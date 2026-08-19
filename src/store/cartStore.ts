@@ -21,6 +21,7 @@ interface CartState {
   toggleCart: () => void;
   getCartTotal: () => number;
   getCartCount: () => number;
+  clearCart: () => void;
 }
 
 export const useCartStore = create<CartState>((set, get) => ({
@@ -70,4 +71,5 @@ export const useCartStore = create<CartState>((set, get) => ({
     const items = get().items;
     return items.reduce((count, item) => count + item.quantity, 0);
   },
+  clearCart: () => set({ items: [] }),
 }));
