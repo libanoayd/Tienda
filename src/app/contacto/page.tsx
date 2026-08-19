@@ -1,6 +1,30 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
 import { MapPin, Phone, Clock, MessageCircle } from "lucide-react";
 
 export default function Contacto() {
+  const [schedule, setSchedule] = useState("Lunes a Sábados: 09:00 a 20:00 hs");
+  const [rating, setRating] = useState("4.3");
+  const [reviews, setReviews] = useState("164");
+  const [address, setAddress] = useState("Suipacha 422, M5500 Mendoza, Argentina");
+
+  useEffect(() => {
+    async function loadSettings() {
+      const { data } = await supabase.from("store_settings").select("*");
+      if (data && data.length > 0) {
+        data.forEach((item: { key: string; value: string }) => {
+          if (item.key === "schedule") setSchedule(item.value);
+          if (item.key === "google_rating") setRating(item.value);
+          if (item.key === "google_reviews") setReviews(item.value);
+          if (item.key === "address") setAddress(item.value);
+        });
+      }
+    }
+    loadSettings();
+  }, []);
+
   return (
     <div className="min-h-screen bg-[var(--color-brand-stone)] pt-28 pb-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -27,7 +51,7 @@ export default function Contacto() {
                   <div>
                     <h3 className="font-semibold text-stone-900">Dirección Exacta</h3>
                     <p className="text-stone-700 font-medium">Pago Fácil Viajantes</p>
-                    <p className="text-stone-600">Suipacha 422, M5500 Mendoza, Argentina.</p>
+                    <p className="text-stone-600">{address}</p>
                     <p className="text-xs text-[var(--color-brand-green)] font-bold mt-1">✓ Retiro GRATIS de compras web en el local.</p>
                   </div>
                 </div>
@@ -36,10 +60,10 @@ export default function Contacto() {
                 <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-center justify-between">
                   <div>
                     <div className="flex items-center space-x-1 text-amber-500 font-bold">
-                      <span className="text-lg text-stone-900 mr-2">4.3</span>
+                      <span className="text-lg text-stone-900 mr-2">{rating}</span>
                       ★ ★ ★ ★ ☆
                     </div>
-                    <p className="text-xs text-stone-600 mt-0.5">164 opiniones reales en Google Maps</p>
+                    <p className="text-xs text-stone-600 mt-0.5">{reviews} opiniones reales en Google Maps</p>
                   </div>
                   <span className="text-xs bg-white text-stone-700 font-semibold px-2.5 py-1 rounded-full border border-amber-200 shadow-2xs">
                     Perfil Verificado
@@ -52,7 +76,7 @@ export default function Contacto() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-stone-900">Horarios de Atención</h3>
-                    <p className="text-stone-600">Abre a las 9:00 a.m. (Lunes a Sábados).</p>
+                    <p className="text-stone-600 font-medium text-[var(--color-brand-dark)]">{schedule}</p>
                   </div>
                 </div>
 
