@@ -15,6 +15,12 @@ export function CartSidebar() {
   const [couponError, setCouponError] = useState("");
   const [applying, setApplying] = useState(false);
 
+  // User details state
+  const [userName, setUserName] = useState("");
+  const [userEmail, setUserEmail] = useState("");
+  const [userPhone, setUserPhone] = useState("");
+  const [isProcessingCheckout, setIsProcessingCheckout] = useState(false);
+
   const handleApplyCoupon = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!couponCode.trim()) return;
@@ -70,6 +76,38 @@ export function CartSidebar() {
 
   const discountAmount = calculateDiscountAmount();
   const finalTotal = Math.max(0, getCartTotal() - discountAmount);
+
+  const handleCheckout = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsProcessingCheckout(true);
+
+    try {
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          items,
+          total: finalTotal,
+          userInfo: {
+            name: userName,
+            email: userEmail,
+            phone: userPhone,
+          }
+        })
+      });
+      const data = await res.json();
+      if (data.init_point) {
+        window.location.href = data.init_point;
+      } else {
+        alert(data.error || "Hubo un error al iniciar el pago.");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Hubo un error al iniciar el pago.");
+    } finally {
+      setIsProcessingCheckout(false);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -132,7 +170,7 @@ export function CartSidebar() {
 
         {/* Footer del Carrito con Cupones y Totales */}
         {items.length > 0 && (
-          <div className="border-t border-stone-200 p-6 bg-stone-50">
+          <div className="border-t border-stone-200 p-6 bg-stone-50 overflow-y-auto">
             
             {/* Input de Cupón de Descuento */}
             <form onSubmit={handleApplyCoupon} className="mb-4">
@@ -183,29 +221,26 @@ export function CartSidebar() {
 
             <p className="mt-0.5 text-xs text-stone-500 mb-4">✓ Retiro GRATIS en el local (Pago Fácil Viajantes).</p>
             
-            <button 
-              onClick={async () => {
-                try {
-                  const res = await fetch("/api/checkout", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ items, total: finalTotal })
-                  });
-                  const data = await res.json();
-                  if (data.init_point) {
-                    window.location.href = data.init_point;
-                  } else {
-                    alert("Mercado Pago: Por favor configura tu Access Token en .env.local");
-                  }
-                } catch (error) {
-                  console.error(error);
-                  alert("Hubo un error al iniciar el pago.");
-                }
-              }}
-              className="w-full bg-[var(--color-brand-green)] text-white px-6 py-4 rounded-md font-medium hover:bg-[var(--color-brand-dark)] transition-colors uppercase tracking-wider shadow-md text-sm"
-            >
-              Iniciar Pago Seguro
-            </button>
+            <form onSubmit={handleCheckout} className="space-y-3 border-t border-stone-200 pt-4">
+              <h4 className="text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Tus datos para el pedido</h4>
+              <div>
+                <input required type="text" placeholder="Nombre completo" value={userName} onChange={e => setUserName(e.target.value)} className="w-full px-3 py-2 text-sm border border-stone-300 rounded-md focus:ring-[var(--color-brand-green)] focus:border-[var(--color-brand-green)]" />
+              </div>
+              <div>
+                <input required type="email" placeholder="Correo electrónico" value={userEmail} onChange={e => setUserEmail(e.target.value)} className="w-full px-3 py-2 text-sm border border-stone-300 rounded-md focus:ring-[var(--color-brand-green)] focus:border-[var(--color-brand-green)]" />
+              </div>
+              <div>
+                <input required type="tel" placeholder="Teléfono" value={userPhone} onChange={e => setUserPhone(e.target.value)} className="w-full px-3 py-2 text-sm border border-stone-300 rounded-md focus:ring-[var(--color-brand-green)] focus:border-[var(--color-brand-green)]" />
+              </div>
+
+              <button 
+                type="submit"
+                disabled={isProcessingCheckout}
+                className="w-full bg-[var(--color-brand-green)] text-white px-6 py-4 rounded-md font-medium hover:bg-[var(--color-brand-dark)] transition-colors uppercase tracking-wider shadow-md text-sm mt-2 disabled:opacity-70"
+              >
+                {isProcessingCheckout ? "Procesando..." : "Iniciar Pago Seguro"}
+              </button>
+            </form>
           </div>
         )}
       </div>

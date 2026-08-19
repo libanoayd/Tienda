@@ -2,12 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { Plus, FolderPlus, Trash2, Edit2, Save, X } from "lucide-react";
+import { Plus, FolderPlus, Trash2, Edit2, Save, X, CornerDownRight } from "lucide-react";
 
 interface Category {
   id?: number;
   name: string;
   slug: string;
+  parent_id?: number | null;
 }
 
 export default function AdminCategorias() {
@@ -18,6 +19,7 @@ export default function AdminCategorias() {
 
   // Form state
   const [name, setName] = useState("");
+  const [parentId, setParentId] = useState<number | "">("");
 
   const fetchCategories = async () => {
     setLoading(true);
@@ -44,15 +46,21 @@ export default function AdminCategorias() {
       .replace(/[^\w\s-]/g, "")
       .replace(/[\s_-]+/g, "-");
 
+    const payload = { 
+      name: name.trim(), 
+      slug, 
+      parent_id: parentId === "" ? null : parentId 
+    };
+
     if (editingCategory?.id) {
       const { error } = await supabase
         .from("categories")
-        .update({ name: name.trim(), slug })
+        .update(payload)
         .eq("id", editingCategory.id);
 
       if (error) alert("Error al actualizar: " + error.message);
     } else {
-      const { error } = await supabase.from("categories").insert([{ name: name.trim(), slug }]);
+      const { error } = await supabase.from("categories").insert([payload]);
       if (error) alert("Error al crear la sección: " + error.message);
     }
 
@@ -74,13 +82,18 @@ export default function AdminCategorias() {
   const openEditModal = (cat: Category) => {
     setEditingCategory(cat);
     setName(cat.name);
+    setParentId(cat.parent_id || "");
     setShowModal(true);
   };
 
   const resetForm = () => {
     setEditingCategory(null);
     setName("");
+    setParentId("");
   };
+
+  // Organizar jerárquicamente para la vista
+  const parentCategories = categories.filter(c => !c.parent_id);
 
   return (
     <div className="p-8">
@@ -88,7 +101,7 @@ export default function AdminCategorias() {
         <div>
           <h1 className="text-3xl font-serif text-stone-900">Gestión de Secciones / Categorías</h1>
           <p className="text-stone-500 text-sm mt-1">
-            Crea las secciones de tu tienda (ej: Velas, Sahumerios, Deco Espiritual, Hornitos).
+            Crea las secciones de tu tienda (ej: Velas, Sahumerios) y subcategorías (ej: Velas de Soja).
           </p>
         </div>
         <button
@@ -116,30 +129,59 @@ export default function AdminCategorias() {
               </tr>
             </thead>
             <tbody className="divide-y divide-stone-100 text-sm">
-              {categories.map((cat) => (
-                <tr key={cat.id} className="hover:bg-stone-50/50 transition-colors">
-                  <td className="py-4 px-6 font-semibold text-[var(--color-brand-dark)] flex items-center">
-                    <FolderPlus className="h-4 w-4 mr-3 text-[var(--color-brand-green)]" />
-                    {cat.name}
-                  </td>
-                  <td className="py-4 px-6 text-stone-500 font-mono text-xs">
-                    {cat.slug}
-                  </td>
-                  <td className="py-4 px-6 text-right space-x-2">
-                    <button
-                      onClick={() => openEditModal(cat)}
-                      className="p-2 text-stone-600 hover:text-[var(--color-brand-green)] hover:bg-stone-100 rounded-md transition-colors"
-                    >
-                      <Edit2 className="h-4 w-4" />
-                    </button>
-                    <button
-                      onClick={() => cat.id && handleDelete(cat.id)}
-                      className="p-2 text-stone-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </td>
-                </tr>
+              {parentCategories.map((parent) => (
+                <React.Fragment key={parent.id}>
+                  {/* Categoría Padre */}
+                  <tr className="hover:bg-stone-50/50 transition-colors bg-stone-50/30">
+                    <td className="py-4 px-6 font-semibold text-[var(--color-brand-dark)] flex items-center">
+                      <FolderPlus className="h-4 w-4 mr-3 text-[var(--color-brand-green)]" />
+                      {parent.name}
+                    </td>
+                    <td className="py-4 px-6 text-stone-500 font-mono text-xs">
+                      {parent.slug}
+                    </td>
+                    <td className="py-4 px-6 text-right space-x-2">
+                      <button
+                        onClick={() => openEditModal(parent)}
+                        className="p-2 text-stone-600 hover:text-[var(--color-brand-green)] hover:bg-stone-100 rounded-md transition-colors"
+                      >
+                        <Edit2 className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => parent.id && handleDelete(parent.id)}
+                        className="p-2 text-stone-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </td>
+                  </tr>
+                  {/* Subcategorías */}
+                  {categories.filter(c => c.parent_id === parent.id).map(sub => (
+                    <tr key={sub.id} className="hover:bg-stone-50/50 transition-colors">
+                      <td className="py-3 px-6 pl-12 font-medium text-stone-700 flex items-center">
+                        <CornerDownRight className="h-4 w-4 mr-2 text-stone-300" />
+                        {sub.name}
+                      </td>
+                      <td className="py-3 px-6 text-stone-400 font-mono text-xs">
+                        {sub.slug}
+                      </td>
+                      <td className="py-3 px-6 text-right space-x-2">
+                        <button
+                          onClick={() => openEditModal(sub)}
+                          className="p-2 text-stone-600 hover:text-[var(--color-brand-green)] hover:bg-stone-100 rounded-md transition-colors"
+                        >
+                          <Edit2 className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => sub.id && handleDelete(sub.id)}
+                          className="p-2 text-stone-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </React.Fragment>
               ))}
             </tbody>
           </table>
@@ -169,6 +211,20 @@ export default function AdminCategorias() {
                   className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-[var(--color-brand-green)] focus:outline-none"
                   required
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-stone-700 mb-1">¿Es subcategoría de...?</label>
+                <select
+                  value={parentId}
+                  onChange={(e) => setParentId(e.target.value === "" ? "" : Number(e.target.value))}
+                  className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-[var(--color-brand-green)] focus:outline-none"
+                >
+                  <option value="">Ninguna (Es una Categoría Principal)</option>
+                  {parentCategories.map(cat => (
+                    <option key={cat.id} value={cat.id}>{cat.name}</option>
+                  ))}
+                </select>
               </div>
 
               <div className="pt-4 flex justify-end space-x-3 border-t border-stone-100">

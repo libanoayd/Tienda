@@ -76,7 +76,7 @@ export default function Contacto() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-stone-900">Horarios de Atención</h3>
-                    <p className="text-stone-600 font-medium text-[var(--color-brand-dark)]">{schedule}</p>
+                    <p className="text-stone-600 font-medium text-[var(--color-brand-dark)] whitespace-pre-line">{schedule}</p>
                   </div>
                 </div>
 

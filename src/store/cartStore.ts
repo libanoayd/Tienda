@@ -5,6 +5,7 @@ export interface Product {
   name: string;
   price: number;
   image: string;
+  stock: number;
 }
 
 export interface CartItem extends Product {
@@ -27,8 +28,13 @@ export const useCartStore = create<CartState>((set, get) => ({
   isOpen: false,
   addToCart: (product) => {
     set((state) => {
+      if (product.stock <= 0) return state; // No agregar si no hay stock
+
       const existingItem = state.items.find((item) => item.id === product.id);
       if (existingItem) {
+        if (existingItem.quantity >= product.stock) {
+          return { ...state, isOpen: true }; // No agregar más del stock
+        }
         return {
           items: state.items.map((item) =>
             item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
@@ -46,9 +52,13 @@ export const useCartStore = create<CartState>((set, get) => ({
   },
   updateQuantity: (productId, quantity) => {
     set((state) => ({
-      items: state.items.map((item) =>
-        item.id === productId ? { ...item, quantity: Math.max(1, quantity) } : item
-      ),
+      items: state.items.map((item) => {
+        if (item.id === productId) {
+          const newQuantity = Math.max(1, Math.min(quantity, item.stock));
+          return { ...item, quantity: newQuantity };
+        }
+        return item;
+      }),
     }));
   },
   toggleCart: () => set((state) => ({ isOpen: !state.isOpen })),

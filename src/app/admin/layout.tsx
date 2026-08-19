@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import { LayoutDashboard, Package, Tag, Settings, LogOut, FolderPlus } from "lucide-react";
+import { LayoutDashboard, Package, Tag, Settings, LogOut, FolderPlus, ShoppingCart } from "lucide-react";
 
 export default function AdminLayout({
   children,
@@ -63,6 +63,13 @@ export default function AdminLayout({
             Dashboard
           </Link>
           <Link 
+            href="/admin/pedidos" 
+            className={`flex items-center px-4 py-3 rounded-md transition-colors ${pathname === '/admin/pedidos' ? 'bg-[var(--color-brand-green)] text-white' : 'text-stone-300 hover:bg-stone-800'}`}
+          >
+            <ShoppingCart className="mr-3 h-5 w-5" />
+            Pedidos
+          </Link>
+          <Link 
             href="/admin/productos" 
             className={`flex items-center px-4 py-3 rounded-md transition-colors ${pathname === '/admin/productos' ? 'bg-[var(--color-brand-green)] text-white' : 'text-stone-300 hover:bg-stone-800'}`}
           >
@@ -82,6 +89,13 @@ export default function AdminLayout({
           >
             <Tag className="mr-3 h-5 w-5" />
             Cupones
+          </Link>
+          <Link 
+            href="/admin/configuracion" 
+            className={`flex items-center px-4 py-3 rounded-md transition-colors ${pathname === '/admin/configuracion' ? 'bg-[var(--color-brand-green)] text-white' : 'text-stone-300 hover:bg-stone-800'}`}
+          >
+            <Settings className="mr-3 h-5 w-5" />
+            Configuración
           </Link>
         </nav>
 

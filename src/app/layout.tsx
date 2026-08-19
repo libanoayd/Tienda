@@ -3,7 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Image from "next/image";
 import Link from "next/link";
-import { ShoppingBag, Menu, MapPin } from "lucide-react";
+import { ShoppingBag, Menu, MapPin, Mail } from "lucide-react";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -50,6 +50,9 @@ export default function RootLayout({
                 <h3 className="text-sm font-bold text-stone-900 tracking-wider uppercase mb-4">Navegación</h3>
                 <ul className="space-y-4">
                   <li>
+                    <Link href="/nosotros" className="text-base text-stone-500 hover:text-stone-900">Nosotros</Link>
+                  </li>
+                  <li>
                     <Link href="/catalogo" className="text-base text-stone-500 hover:text-stone-900">Catálogo</Link>
                   </li>
                   <li>
@@ -76,11 +79,28 @@ export default function RootLayout({
                 &copy; 2026 Líbano Aromas y Decoración.
               </p>
               <div className="flex space-x-6 mt-4 md:mt-0">
-                <a href="https://instagram.com/libanoayd" target="_blank" rel="noopener noreferrer" className="text-stone-400 hover:text-stone-900">
-                  Instagram
+                <a href="https://instagram.com/libanoayd" target="_blank" rel="noopener noreferrer" className="flex items-center text-stone-400 hover:text-stone-900 transition-colors">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="mr-2"
+                  >
+                    <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                    <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+                  </svg>
+                  <span>Instagram</span>
                 </a>
-                <a href="mailto:libanoayd@gmail.com" className="text-stone-400 hover:text-stone-900">
-                  libanoayd@gmail.com
+                <a href="mailto:libanoayd@gmail.com" className="flex items-center text-stone-400 hover:text-stone-900 transition-colors">
+                  <Mail className="h-5 w-5 mr-2" />
+                  <span>libanoayd@gmail.com</span>
                 </a>
               </div>
             </div>

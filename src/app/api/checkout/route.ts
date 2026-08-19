@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { MercadoPagoConfig, Preference } from "mercadopago";
+import { supabase } from "@/lib/supabase";
 
 // Inicializamos Mercado Pago con el token de acceso (lo sacamos de .env.local)
 const client = new MercadoPagoConfig({ 
@@ -8,7 +9,7 @@ const client = new MercadoPagoConfig({
 
 export async function POST(request: Request) {
   try {
-    const { items, total } = await request.json();
+    const { items, total, userInfo } = await request.json();
 
     if (!items || items.length === 0) {
       return NextResponse.json({ error: "El carrito está vacío" }, { status: 400 });
@@ -22,6 +23,41 @@ export async function POST(request: Request) {
         error: "Por favor, agrega tu MP_ACCESS_TOKEN de Mercado Pago en .env.local y Vercel.",
         init_point: null 
       }, { status: 200 });
+    }
+
+    // 1. Guardar la orden en Supabase como pendiente
+    const { data: orderData, error: orderError } = await supabase
+      .from("orders")
+      .insert({
+        user_name: userInfo?.name || "Anónimo",
+        user_email: userInfo?.email || "",
+        user_phone: userInfo?.phone || "",
+        total: total,
+        status: "pending"
+      })
+      .select()
+      .single();
+
+    if (orderError || !orderData) {
+      console.error("Error guardando orden:", orderError);
+      return NextResponse.json({ error: "No se pudo crear la orden" }, { status: 500 });
+    }
+
+    // 2. Guardar los items de la orden
+    const orderItems = items.map((item: any) => ({
+      order_id: orderData.id,
+      product_id: item.id,
+      product_name: item.name,
+      quantity: item.quantity,
+      price: item.price
+    }));
+
+    const { error: itemsError } = await supabase
+      .from("order_items")
+      .insert(orderItems);
+
+    if (itemsError) {
+      console.error("Error guardando items:", itemsError);
     }
 
     // Mapeamos los items del carrito al formato que pide Mercado Pago
@@ -39,6 +75,7 @@ export async function POST(request: Request) {
     const response = await preference.create({
       body: {
         items: preferenceItems,
+        external_reference: orderData.id.toString(), // Enviamos el ID de orden a MP
         back_urls: {
           success: "http://localhost:3000/pago-exitoso",
           failure: "http://localhost:3000/pago-fallido",
@@ -47,6 +84,9 @@ export async function POST(request: Request) {
         auto_return: "approved",
       }
     });
+
+    // Guardamos el payment_id temporalmente si MP lo provee en la pref (generalmente en webhook, pero guardamos ref)
+    await supabase.from("orders").update({ payment_id: response.id }).eq("id", orderData.id);
 
     // Devolvemos el link de pago (init_point) al frontend
     return NextResponse.json({ init_point: response.init_point });

@@ -72,15 +72,15 @@ export default function AdminConfiguracion() {
           <label className="block font-medium text-stone-900 mb-2 flex items-center">
             <Clock className="h-5 w-5 mr-2 text-[var(--color-brand-green)]" /> Horarios de Atención
           </label>
-          <input
-            type="text"
+          <textarea
             value={schedule}
             onChange={(e) => setSchedule(e.target.value)}
-            placeholder="Ej: Lunes a Sábados: 09:00 a 20:00 hs"
+            placeholder="Ej: Lunes a Viernes: 09:00 a 13:00 hs y 16:30 a 18:30 hs&#10;Sábados: 10:00 a 13:30 hs"
+            rows={3}
             className="w-full px-4 py-3 border border-stone-300 rounded-lg focus:ring-2 focus:ring-[var(--color-brand-green)] focus:outline-none"
             required
           />
-          <p className="text-xs text-stone-500 mt-1">Este texto aparecerá en la sección de contacto del local.</p>
+          <p className="text-xs text-stone-500 mt-1">Puedes escribir varias líneas (presionando Enter). Este texto aparecerá en la sección de contacto del local.</p>
         </div>
 
         {/* Puntuación de Google */}

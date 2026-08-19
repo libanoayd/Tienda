@@ -58,6 +58,9 @@ export function Navbar() {
             <Link href="/" className={`text-sm font-medium transition-colors uppercase tracking-wider ${!isHomePage || isScrolled ? 'text-[var(--color-brand-dark)] hover:text-[var(--color-brand-green)]' : 'text-white hover:text-stone-200 drop-shadow-md'}`}>
               Inicio
             </Link>
+            <Link href="/nosotros" className={`text-sm font-medium transition-colors uppercase tracking-wider ${!isHomePage || isScrolled ? 'text-[var(--color-brand-dark)] hover:text-[var(--color-brand-green)]' : 'text-white hover:text-stone-200 drop-shadow-md'}`}>
+              Nosotros
+            </Link>
             <Link href="/catalogo" className={`text-sm font-medium transition-colors uppercase tracking-wider ${!isHomePage || isScrolled ? 'text-[var(--color-brand-dark)] hover:text-[var(--color-brand-green)]' : 'text-white hover:text-stone-200 drop-shadow-md'}`}>
               Productos
             </Link>
