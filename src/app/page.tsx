@@ -39,11 +39,11 @@ export default async function Home() {
           />
         </div>
         <div className="relative z-10 text-center px-4 max-w-3xl pt-20">
-          <h1 className="text-4xl md:text-6xl font-serif text-white mb-6 drop-shadow-md">
-            El aroma de tu hogar, tu firma personal
+          <h1 className="text-5xl md:text-7xl font-serif text-white mb-6 drop-shadow-lg">
+            Líbano Aromas y Decoración
           </h1>
-          <p className="text-lg md:text-xl text-white/90 mb-8 max-w-xl mx-auto drop-shadow">
-            Descubrí nuestra nueva colección de velas, difusores y objetos decorativos diseñados para elevar tus espacios.
+          <p className="text-xl text-stone-100 mb-10 font-light drop-shadow-md">
+            Insumos de decoración y sahumerios artesanales para crear ambientes de paz.
           </p>
           <Link 
             href="/catalogo" 
