@@ -25,10 +25,25 @@ export default function Contacto() {
                     <MapPin className="h-6 w-6" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-stone-900">Dirección y Retiros</h3>
-                    <p className="text-stone-600">Pago Fácil Viajantes, Mendoza, Argentina.</p>
-                    <p className="text-xs text-[var(--color-brand-green)] font-bold mt-1">✓ Retiro GRATIS de compras web aquí.</p>
+                    <h3 className="font-semibold text-stone-900">Dirección Exacta</h3>
+                    <p className="text-stone-700 font-medium">Pago Fácil Viajantes</p>
+                    <p className="text-stone-600">Suipacha 422, M5500 Mendoza, Argentina.</p>
+                    <p className="text-xs text-[var(--color-brand-green)] font-bold mt-1">✓ Retiro GRATIS de compras web en el local.</p>
                   </div>
+                </div>
+
+                {/* Badge de Reseñas de Google */}
+                <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-center justify-between">
+                  <div>
+                    <div className="flex items-center space-x-1 text-amber-500 font-bold">
+                      <span className="text-lg text-stone-900 mr-2">4.3</span>
+                      ★ ★ ★ ★ ☆
+                    </div>
+                    <p className="text-xs text-stone-600 mt-0.5">164 opiniones reales en Google Maps</p>
+                  </div>
+                  <span className="text-xs bg-white text-stone-700 font-semibold px-2.5 py-1 rounded-full border border-amber-200 shadow-2xs">
+                    Perfil Verificado
+                  </span>
                 </div>
 
                 <div className="flex items-start">
@@ -37,7 +52,7 @@ export default function Contacto() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-stone-900">Horarios de Atención</h3>
-                    <p className="text-stone-600">Lunes a Sábados: 09:00 a 20:00 hs.</p>
+                    <p className="text-stone-600">Abre a las 9:00 a.m. (Lunes a Sábados).</p>
                   </div>
                 </div>
 
@@ -63,10 +78,10 @@ export default function Contacto() {
             </a>
           </div>
 
-          {/* Mapa Interactivo de Google Maps */}
-          <div className="h-[400px] w-full rounded-xl overflow-hidden border border-stone-200 relative">
+          {/* Mapa Interactivo de Google Maps centrado en Suipacha 422 */}
+          <div className="h-[420px] w-full rounded-xl overflow-hidden border border-stone-200 relative shadow-sm">
             <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3349.567!2d-68.8471!3d-32.8894!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x967e093d!2sMendoza!5e0!3m2!1ses!2sar!4v1700000000000!5m2!1ses!2sar"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3350.254189381!2d-68.8471904!3d-32.8856641!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x967e09214ab3b379%3A0x7d6f51950d995c7!2sSuipacha%20422%2C%20M5500%20Mendoza!5e0!3m2!1ses!2sar!4v1700000000000!5m2!1ses!2sar"
               width="100%"
               height="100%"
               style={{ border: 0 }}
