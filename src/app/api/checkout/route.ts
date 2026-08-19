@@ -69,6 +69,8 @@ export async function POST(request: Request) {
       currency_id: "ARS",
     }));
 
+    const origin = request.headers.get("origin") || "https://libanoayd.vercel.app";
+
     // Creamos la preferencia de pago
     const preference = new Preference(client);
     
@@ -77,9 +79,9 @@ export async function POST(request: Request) {
         items: preferenceItems,
         external_reference: orderData.id.toString(), // Enviamos el ID de orden a MP
         back_urls: {
-          success: "http://localhost:3000/pago-exitoso",
-          failure: "http://localhost:3000/pago-fallido",
-          pending: "http://localhost:3000/pago-pendiente",
+          success: `${origin}/pago-exitoso`,
+          failure: `${origin}/pago-fallido`,
+          pending: `${origin}/pago-pendiente`,
         },
         auto_return: "approved",
       }
