@@ -2,16 +2,27 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Star } from "lucide-react";
 
+import { supabase } from "@/lib/supabase";
 import { ProductCard } from "@/components/ProductCard";
 
-export default function Home() {
-  // Productos mockeados para la fase inicial, usando las imagenes de la carpeta Productos PNG
-  const featuredProducts = [
-    { id: 1, name: "Yagra", price: 4500, image: "/productos/yagra.png", stock: 10 },
-    { id: 2, name: "Caja Palo Santo", price: 8900, image: "/productos/palo-santo.png", stock: 10 },
-    { id: 3, name: "Incienso", price: 3200, image: "/productos/incienso.png", stock: 10 },
-    { id: 4, name: "Conos Aromáticos", price: 5400, image: "/productos/conos.png", stock: 10 },
-  ];
+export const revalidate = 60; // Refrescar caché cada 60s
+
+export default async function Home() {
+  // Obtener los últimos 4 productos reales de la base de datos
+  const { data: dbProducts } = await supabase
+    .from("products")
+    .select("*")
+    .order("id", { ascending: false })
+    .limit(4);
+
+  // Mapeamos los datos de DB al formato que espera ProductCard
+  const featuredProducts = (dbProducts || []).map(p => ({
+    id: p.id,
+    name: p.name,
+    price: p.price,
+    image: p.image_url || "/placeholder.jpg",
+    stock: p.stock || 0
+  }));
 
   return (
     <div className="flex flex-col">
