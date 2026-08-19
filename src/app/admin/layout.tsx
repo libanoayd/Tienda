@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import { LayoutDashboard, Package, Tag, Settings, LogOut } from "lucide-react";
+import { LayoutDashboard, Package, Tag, Settings, LogOut, FolderPlus } from "lucide-react";
 
 export default function AdminLayout({
   children,
@@ -68,6 +68,13 @@ export default function AdminLayout({
           >
             <Package className="mr-3 h-5 w-5" />
             Productos
+          </Link>
+          <Link 
+            href="/admin/categorias" 
+            className={`flex items-center px-4 py-3 rounded-md transition-colors ${pathname === '/admin/categorias' ? 'bg-[var(--color-brand-green)] text-white' : 'text-stone-300 hover:bg-stone-800'}`}
+          >
+            <FolderPlus className="mr-3 h-5 w-5" />
+            Secciones
           </Link>
           <Link 
             href="/admin/cupones" 

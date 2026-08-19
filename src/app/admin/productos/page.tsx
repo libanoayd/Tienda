@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { Plus, Edit2, Trash2, Image as ImageIcon, Save, X, Tag, Box } from "lucide-react";
+import { Plus, Edit2, Trash2, Image as ImageIcon, Save, X, Tag, Box, Hash } from "lucide-react";
 
 interface Product {
   id?: number;
@@ -10,6 +10,7 @@ interface Product {
   brand?: string;
   presentation?: string;
   price: number;
+  stock?: number;
   image_url: string;
   category_id?: number;
   is_active?: boolean;
@@ -27,11 +28,12 @@ export default function AdminProductos() {
   const [showModal, setShowModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
-  // Form State con Variaciones
+  // Form State con Variaciones y Stock
   const [name, setName] = useState("");
   const [brand, setBrand] = useState("");
   const [presentation, setPresentation] = useState("");
   const [price, setPrice] = useState("");
+  const [stock, setStock] = useState("10");
   const [categoryId, setCategoryId] = useState("");
   const [imageUrl, setImageUrl] = useState("");
 
@@ -65,6 +67,7 @@ export default function AdminProductos() {
       brand: brand || "Líbano",
       presentation: presentation || "Unidad",
       price: parseFloat(price),
+      stock: parseInt(stock) || 0,
       category_id: categoryId ? parseInt(categoryId) : null,
       image_url: imageUrl || "/productos/yagra.png",
     };
@@ -98,6 +101,7 @@ export default function AdminProductos() {
     setBrand(product.brand || "");
     setPresentation(product.presentation || "");
     setPrice(product.price.toString());
+    setStock(product.stock !== undefined ? product.stock.toString() : "10");
     setCategoryId(product.category_id ? product.category_id.toString() : "");
     setImageUrl(product.image_url);
     setShowModal(true);
@@ -109,6 +113,7 @@ export default function AdminProductos() {
     setBrand("");
     setPresentation("");
     setPrice("");
+    setStock("10");
     setCategoryId("");
     setImageUrl("");
   };
@@ -117,8 +122,8 @@ export default function AdminProductos() {
     <div className="p-8">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-serif text-stone-900">Gestión de Productos y Variaciones</h1>
-          <p className="text-stone-500 text-sm mt-1">Carga productos especificando marca (Sagrada Madre, Just, etc.) y presentación.</p>
+          <h1 className="text-3xl font-serif text-stone-900">Gestión de Productos, Stock y Variaciones</h1>
+          <p className="text-stone-500 text-sm mt-1">Carga productos especificando marca, presentación y cantidad en stock.</p>
         </div>
         <button
           onClick={() => { resetForm(); setShowModal(true); }}
@@ -134,8 +139,6 @@ export default function AdminProductos() {
         ) : products.length === 0 ? (
           <div className="p-12 text-center text-stone-500">
             No hay productos cargados todavía en Supabase.
-            <br />
-            <span className="text-xs text-stone-400">Recuerda haber ejecutado el nuevo código en el SQL Editor de Supabase.</span>
           </div>
         ) : (
           <table className="w-full text-left border-collapse">
@@ -145,6 +148,7 @@ export default function AdminProductos() {
                 <th className="py-4 px-6 font-medium">Producto</th>
                 <th className="py-4 px-6 font-medium">Marca</th>
                 <th className="py-4 px-6 font-medium">Presentación</th>
+                <th className="py-4 px-6 font-medium">Stock</th>
                 <th className="py-4 px-6 font-medium">Precio</th>
                 <th className="py-4 px-6 font-medium text-right">Acciones</th>
               </tr>
@@ -170,6 +174,13 @@ export default function AdminProductos() {
                   <td className="py-3 px-6 text-stone-600">
                     <span className="inline-flex items-center text-xs text-stone-500">
                       <Box className="h-3 w-3 mr-1" /> {product.presentation || "Unidad"}
+                    </span>
+                  </td>
+                  <td className="py-3 px-6 font-medium">
+                    <span className={`px-2.5 py-1 text-xs rounded-full font-bold ${
+                      (product.stock || 0) > 0 ? "bg-emerald-100 text-emerald-800" : "bg-red-100 text-red-800"
+                    }`}>
+                      {product.stock || 0} unidades
                     </span>
                   </td>
                   <td className="py-3 px-6 font-semibold text-[var(--color-brand-terra)]">
@@ -228,7 +239,7 @@ export default function AdminProductos() {
                     type="text"
                     value={brand}
                     onChange={(e) => setBrand(e.target.value)}
-                    placeholder="Ej: Sagrada Madre, Just, Tera India"
+                    placeholder="Ej: Sagrada Madre, Just"
                     className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-[var(--color-brand-green)] focus:outline-none"
                   />
                 </div>
@@ -245,7 +256,7 @@ export default function AdminProductos() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-stone-700 mb-1">Precio ($ ARS)</label>
                   <input
@@ -259,11 +270,22 @@ export default function AdminProductos() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-1">Categoría / Sección</label>
+                  <label className="block text-sm font-medium text-stone-700 mb-1">Stock (Cant.)</label>
+                  <input
+                    type="number"
+                    value={stock}
+                    onChange={(e) => setStock(e.target.value)}
+                    placeholder="Ej: 10"
+                    className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-[var(--color-brand-green)] focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-stone-700 mb-1">Sección</label>
                   <select
                     value={categoryId}
                     onChange={(e) => setCategoryId(e.target.value)}
-                    className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-[var(--color-brand-green)] focus:outline-none bg-white"
+                    className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-[var(--color-brand-green)] focus:outline-none bg-white text-sm"
                   >
                     <option value="">-- Seleccionar --</option>
                     {categories.map((cat) => (
