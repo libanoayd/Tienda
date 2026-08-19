@@ -69,16 +69,31 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-serif text-stone-900 mb-12">Lo que dicen de nosotros</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Reviews mockeadas basadas en Google Maps */}
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-white p-8 rounded shadow-sm flex flex-col items-center">
-                <div className="flex text-yellow-400 mb-4">
-                  {[...Array(5)].map((_, j) => <Star key={j} className="h-5 w-5 fill-current" />)}
+            {[
+              {
+                text: "Excelente atención y los sahumerios son de primera calidad. Siempre encuentro los aromas que busco y la calidez del lugar es hermosa.",
+                author: "María Laura G.",
+                stars: 5,
+              },
+              {
+                text: "Muy buena predisposición y rapidez en la atención para retirar las compras. Además las velas y aceites huelen riquísimo. 100% recomendado.",
+                author: "Carlos R.",
+                stars: 5,
+              },
+              {
+                text: "Hermosos objetos de decoración y gran variedad de inciensos. Da gusto comprar acá, te atienden con mucha amabilidad siempre.",
+                author: "Patricia M.",
+                stars: 5,
+              },
+            ].map((review, i) => (
+              <div key={i} className="bg-white p-8 rounded-xl shadow-sm flex flex-col items-center border border-stone-200">
+                <div className="flex text-amber-400 mb-4">
+                  {[...Array(review.stars)].map((_, j) => <Star key={j} className="h-5 w-5 fill-current" />)}
                 </div>
                 <p className="text-stone-600 italic mb-6 text-sm flex-grow">
-                  "Excelente atención y los productos son de primera calidad. El aroma dura muchísimo tiempo en el ambiente."
+                  "{review.text}"
                 </p>
-                <span className="font-medium text-stone-900 text-sm">- Cliente Verificado en Google</span>
+                <span className="font-semibold text-stone-900 text-sm">- {review.author} (Google Maps)</span>
               </div>
             ))}
           </div>
