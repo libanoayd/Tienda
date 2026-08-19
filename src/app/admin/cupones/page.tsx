@@ -2,26 +2,40 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { Plus, Tag, Trash2, Save, X, Percent } from "lucide-react";
+import { Plus, Tag, Trash2, Save, X, Percent, Layers } from "lucide-react";
 
 interface Coupon {
   id?: number;
   code: string;
   discount_percentage: number;
+  target_type: string;
+  category_id?: number | null;
   is_active: boolean;
+}
+
+interface Category {
+  id: number;
+  name: string;
 }
 
 export default function AdminCupones() {
   const [coupons, setCoupons] = useState<Coupon[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
 
   // Form state
   const [code, setCode] = useState("");
   const [discount, setDiscount] = useState("");
+  const [targetType, setTargetType] = useState("all");
+  const [categoryId, setCategoryId] = useState("");
 
-  const fetchCoupons = async () => {
+  const fetchData = async () => {
     setLoading(true);
+
+    const { data: catData } = await supabase.from("categories").select("*");
+    if (catData) setCategories(catData);
+
     const { data, error } = await supabase.from("coupons").select("*").order("id", { ascending: false });
     if (error) {
       console.error("Error al cargar cupones:", error);
@@ -32,7 +46,7 @@ export default function AdminCupones() {
   };
 
   useEffect(() => {
-    fetchCoupons();
+    fetchData();
   }, []);
 
   const handleSaveCoupon = async (e: React.FormEvent) => {
@@ -43,6 +57,8 @@ export default function AdminCupones() {
       {
         code: code.toUpperCase().trim(),
         discount_percentage: parseInt(discount),
+        target_type: targetType,
+        category_id: targetType === "category" && categoryId ? parseInt(categoryId) : null,
         is_active: true,
       },
     ]);
@@ -51,9 +67,8 @@ export default function AdminCupones() {
       alert("Error al guardar cupón: " + error.message);
     } else {
       setShowModal(false);
-      setCode("");
-      setDiscount("");
-      fetchCoupons();
+      resetForm();
+      fetchData();
     }
   };
 
@@ -63,8 +78,21 @@ export default function AdminCupones() {
     if (error) {
       alert("Error al eliminar: " + error.message);
     } else {
-      fetchCoupons();
+      fetchData();
     }
+  };
+
+  const resetForm = () => {
+    setCode("");
+    setDiscount("");
+    setTargetType("all");
+    setCategoryId("");
+  };
+
+  const getCategoryName = (catId?: number | null) => {
+    if (!catId) return "Todo el sitio";
+    const found = categories.find((c) => c.id === catId);
+    return found ? found.name : "Categoría específica";
   };
 
   return (
@@ -72,10 +100,12 @@ export default function AdminCupones() {
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-serif text-stone-900">Gestión de Cupones de Descuento</h1>
-          <p className="text-stone-500 text-sm mt-1">Crea códigos promocionales para tus clientes (ej: LIBANO10).</p>
+          <p className="text-stone-500 text-sm mt-1">
+            Crea promociones para todo el sitio o exclusivas para una sección específica (ej: Solo Sahumerios).
+          </p>
         </div>
         <button
-          onClick={() => setShowModal(true)}
+          onClick={() => { resetForm(); setShowModal(true); }}
           className="flex items-center px-4 py-3 bg-[var(--color-brand-green)] text-white font-medium rounded-lg hover:bg-[var(--color-brand-dark)] transition-colors shadow-sm"
         >
           <Plus className="mr-2 h-5 w-5" /> Nuevo Cupón
@@ -95,6 +125,7 @@ export default function AdminCupones() {
               <tr className="bg-stone-50 border-b border-stone-200 text-stone-500 text-sm">
                 <th className="py-4 px-6 font-medium">Código</th>
                 <th className="py-4 px-6 font-medium">Descuento</th>
+                <th className="py-4 px-6 font-medium">Aplica a</th>
                 <th className="py-4 px-6 font-medium">Estado</th>
                 <th className="py-4 px-6 font-medium text-right">Acción</th>
               </tr>
@@ -110,6 +141,12 @@ export default function AdminCupones() {
                   </td>
                   <td className="py-4 px-6 font-semibold text-[var(--color-brand-terra)]">
                     {coupon.discount_percentage}% OFF
+                  </td>
+                  <td className="py-4 px-6 text-stone-600">
+                    <span className="inline-flex items-center text-xs font-medium bg-stone-100 text-stone-800 px-2.5 py-1 rounded-full border border-stone-200">
+                      <Layers className="h-3 w-3 mr-1 text-stone-500" />
+                      {coupon.target_type === "category" ? getCategoryName(coupon.category_id) : "🌐 Todo el Sitio"}
+                    </span>
                   </td>
                   <td className="py-4 px-6">
                     <span className="px-2.5 py-1 text-xs font-semibold bg-green-100 text-green-800 rounded-full">
@@ -148,7 +185,7 @@ export default function AdminCupones() {
                   type="text"
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
-                  placeholder="Ej: LIBANO20"
+                  placeholder="Ej: SAHUMERIOS15"
                   className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-[var(--color-brand-green)] focus:outline-none uppercase font-bold tracking-wider"
                   required
                 />
@@ -163,13 +200,42 @@ export default function AdminCupones() {
                     max="100"
                     value={discount}
                     onChange={(e) => setDiscount(e.target.value)}
-                    placeholder="Ej: 20"
+                    placeholder="Ej: 15"
                     className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-[var(--color-brand-green)] focus:outline-none"
                     required
                   />
                   <Percent className="absolute right-3 top-2.5 h-5 w-5 text-stone-400" />
                 </div>
               </div>
+
+              <div>
+                <label className="block text-sm font-medium text-stone-700 mb-1">¿Dónde aplica el descuento?</label>
+                <select
+                  value={targetType}
+                  onChange={(e) => setTargetType(e.target.value)}
+                  className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-[var(--color-brand-green)] focus:outline-none bg-white font-medium"
+                >
+                  <option value="all">🌐 Todo el sitio (Todos los productos)</option>
+                  <option value="category">🏷️ Solo a una Sección / Categoría específica</option>
+                </select>
+              </div>
+
+              {targetType === "category" && (
+                <div>
+                  <label className="block text-sm font-medium text-stone-700 mb-1">Selecciona la Sección</label>
+                  <select
+                    value={categoryId}
+                    onChange={(e) => setCategoryId(e.target.value)}
+                    className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-[var(--color-brand-green)] focus:outline-none bg-white"
+                    required
+                  >
+                    <option value="">-- Elige una sección --</option>
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.id}>{cat.name}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               <div className="pt-4 flex justify-end space-x-3 border-t border-stone-100">
                 <button

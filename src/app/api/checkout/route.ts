@@ -8,10 +8,20 @@ const client = new MercadoPagoConfig({
 
 export async function POST(request: Request) {
   try {
-    const { items } = await request.json();
+    const { items, total } = await request.json();
 
     if (!items || items.length === 0) {
       return NextResponse.json({ error: "El carrito está vacío" }, { status: 400 });
+    }
+
+    const token = process.env.MP_ACCESS_TOKEN;
+
+    // Si no hay token real de Mercado Pago cargado aún
+    if (!token || token.startsWith("TEST-0000")) {
+      return NextResponse.json({ 
+        error: "Por favor, agrega tu MP_ACCESS_TOKEN de Mercado Pago en .env.local y Vercel.",
+        init_point: null 
+      }, { status: 200 });
     }
 
     // Mapeamos los items del carrito al formato que pide Mercado Pago

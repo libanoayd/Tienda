@@ -1,11 +1,75 @@
 "use client";
 
+import { useState } from "react";
 import { useCartStore } from "@/store/cartStore";
-import { X, Minus, Plus, ShoppingBag } from "lucide-react";
+import { X, Minus, Plus, ShoppingBag, Tag, CheckCircle } from "lucide-react";
 import Image from "next/image";
+import { supabase } from "@/lib/supabase";
 
 export function CartSidebar() {
   const { items, isOpen, toggleCart, updateQuantity, removeFromCart, getCartTotal } = useCartStore();
+
+  // Coupon State
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discount: number; targetType: string; categoryId?: number | null } | null>(null);
+  const [couponError, setCouponError] = useState("");
+  const [applying, setApplying] = useState(false);
+
+  const handleApplyCoupon = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!couponCode.trim()) return;
+
+    setApplying(true);
+    setCouponError("");
+
+    const cleanCode = couponCode.trim().toUpperCase();
+
+    // 1. Consultar Supabase por el cupón activo
+    const { data, error } = await supabase
+      .from("coupons")
+      .select("*")
+      .eq("code", cleanCode)
+      .eq("is_active", true)
+      .single();
+
+    if (error || !data) {
+      setCouponError("Cupón inválido o expirado");
+      setAppliedCoupon(null);
+    } else {
+      setAppliedCoupon({
+        code: data.code,
+        discount: data.discount_percentage,
+        targetType: data.target_type || "all",
+        categoryId: data.category_id,
+      });
+      setCouponError("");
+    }
+
+    setApplying(false);
+  };
+
+  // Calcular descuento en dinero ($)
+  const calculateDiscountAmount = () => {
+    if (!appliedCoupon) return 0;
+
+    const subtotal = getCartTotal();
+
+    if (appliedCoupon.targetType === "all") {
+      return (subtotal * appliedCoupon.discount) / 100;
+    } else if (appliedCoupon.targetType === "category" && appliedCoupon.categoryId) {
+      // Aplicar porcentaje solo a los productos de esa categoría
+      const eligibleTotal = items
+        .filter((item: any) => item.category_id === appliedCoupon.categoryId)
+        .reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+      return (eligibleTotal * appliedCoupon.discount) / 100;
+    }
+
+    return 0;
+  };
+
+  const discountAmount = calculateDiscountAmount();
+  const finalTotal = Math.max(0, getCartTotal() - discountAmount);
 
   if (!isOpen) return null;
 
@@ -13,15 +77,18 @@ export function CartSidebar() {
     <>
       <div className="fixed inset-0 bg-black/50 z-50 transition-opacity" onClick={toggleCart} />
       <div className="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-white shadow-xl flex flex-col transform transition-transform duration-300">
+        
+        {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-stone-200">
           <h2 className="text-2xl font-serif text-stone-900 flex items-center">
-            <ShoppingBag className="mr-3" /> Tu Carrito
+            <ShoppingBag className="mr-3 text-[var(--color-brand-green)]" /> Tu Carrito
           </h2>
           <button onClick={toggleCart} className="text-stone-500 hover:text-stone-900">
             <X className="h-6 w-6" />
           </button>
         </div>
 
+        {/* Lista de productos */}
         <div className="flex-1 overflow-y-auto p-6">
           {items.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-stone-500">
@@ -63,33 +130,79 @@ export function CartSidebar() {
           )}
         </div>
 
+        {/* Footer del Carrito con Cupones y Totales */}
         {items.length > 0 && (
-          <div className="border-t border-stone-200 p-6">
-            <div className="flex justify-between text-lg font-medium text-stone-900 mb-4">
-              <p>Total</p>
-              <p>${getCartTotal().toLocaleString('es-AR')}</p>
+          <div className="border-t border-stone-200 p-6 bg-stone-50">
+            
+            {/* Input de Cupón de Descuento */}
+            <form onSubmit={handleApplyCoupon} className="mb-4">
+              <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-1.5 flex items-center">
+                <Tag className="h-3.5 w-3.5 mr-1 text-[var(--color-brand-green)]" /> ¿Tienes un cupón de descuento?
+              </label>
+              <div className="flex space-x-2">
+                <input
+                  type="text"
+                  value={couponCode}
+                  onChange={(e) => setCouponCode(e.target.value)}
+                  placeholder="Ej: LIBANO10"
+                  className="flex-1 px-3 py-2 text-sm border border-stone-300 rounded-md focus:ring-2 focus:ring-[var(--color-brand-green)] focus:outline-none uppercase font-bold tracking-wider"
+                />
+                <button
+                  type="submit"
+                  disabled={applying}
+                  className="px-4 py-2 bg-stone-900 text-white text-xs font-medium rounded-md hover:bg-stone-800 transition-colors uppercase tracking-wider"
+                >
+                  {applying ? "..." : "Aplicar"}
+                </button>
+              </div>
+              {couponError && <p className="text-red-500 text-xs mt-1">{couponError}</p>}
+              {appliedCoupon && (
+                <p className="text-green-700 text-xs mt-1.5 font-medium flex items-center">
+                  <CheckCircle className="h-3.5 w-3.5 mr-1" /> Cupón <strong>{appliedCoupon.code}</strong> aplicado ({appliedCoupon.discount}% OFF)
+                </p>
+              )}
+            </form>
+
+            {/* Totales y Descuentos */}
+            <div className="space-y-2 text-sm text-stone-600 mb-4 pt-2 border-t border-stone-200">
+              <div className="flex justify-between">
+                <span>Subtotal</span>
+                <span>${getCartTotal().toLocaleString('es-AR')}</span>
+              </div>
+              {appliedCoupon && discountAmount > 0 && (
+                <div className="flex justify-between text-green-700 font-medium">
+                  <span>Descuento ({appliedCoupon.discount}%)</span>
+                  <span>-${discountAmount.toLocaleString('es-AR')}</span>
+                </div>
+              )}
+              <div className="flex justify-between text-lg font-bold text-stone-900 pt-2 border-t border-stone-200">
+                <span>Total a pagar</span>
+                <span className="text-[var(--color-brand-terra)]">${finalTotal.toLocaleString('es-AR')}</span>
+              </div>
             </div>
-            <p className="mt-0.5 text-sm text-stone-500 mb-6">El retiro en el local es gratis.</p>
+
+            <p className="mt-0.5 text-xs text-stone-500 mb-4">✓ Retiro GRATIS en el local (Pago Fácil Viajantes).</p>
+            
             <button 
               onClick={async () => {
                 try {
                   const res = await fetch("/api/checkout", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ items })
+                    body: JSON.stringify({ items, total: finalTotal })
                   });
                   const data = await res.json();
                   if (data.init_point) {
-                    window.location.href = data.init_point; // Redirigir a Mercado Pago
+                    window.location.href = data.init_point;
                   } else {
-                    alert("Por favor, configura el Access Token de Mercado Pago.");
+                    alert("Mercado Pago: Por favor configura tu Access Token en .env.local");
                   }
                 } catch (error) {
                   console.error(error);
                   alert("Hubo un error al iniciar el pago.");
                 }
               }}
-              className="w-full bg-[var(--color-brand-green)] text-white px-6 py-4 rounded-md font-medium hover:bg-[var(--color-brand-dark)] transition-colors uppercase tracking-wider"
+              className="w-full bg-[var(--color-brand-green)] text-white px-6 py-4 rounded-md font-medium hover:bg-[var(--color-brand-dark)] transition-colors uppercase tracking-wider shadow-md text-sm"
             >
               Iniciar Pago Seguro
             </button>

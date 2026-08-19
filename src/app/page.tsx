@@ -19,7 +19,7 @@ export default function Home() {
       <section className="relative h-[80vh] w-full flex items-center justify-center -mt-20">
         <div className="absolute inset-0 w-full h-full">
           <Image 
-            src="/hero-nuevo.jpg" 
+            src="/hero-libano.jpg" 
             alt="Líbano Home Decor" 
             fill
             sizes="100vw"
