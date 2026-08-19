@@ -1,69 +1,99 @@
 import Image from "next/image";
+import Link from "next/link";
+import { ArrowRight, Star } from "lucide-react";
+
+import { ProductCard } from "@/components/ProductCard";
 
 export default function Home() {
+  // Productos mockeados para la fase inicial, usando las imagenes de la carpeta Productos PNG
+  const featuredProducts = [
+    { id: 1, name: "Yagra", price: 4500, image: "/productos/yagra.png" },
+    { id: 2, name: "Caja Palo Santo", price: 8900, image: "/productos/palo-santo.png" },
+    { id: 3, name: "Incienso", price: 3200, image: "/productos/incienso.png" },
+    { id: 4, name: "Conos Aromáticos", price: 5400, image: "/productos/conos.png" },
+  ];
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
+    <div className="flex flex-col">
+      {/* Hero Section */}
+      <section className="relative h-[80vh] w-full flex items-center justify-center -mt-20">
+        <div className="absolute inset-0 w-full h-full">
+          <Image 
+            src="/hero-nuevo.jpg" 
+            alt="Líbano Home Decor" 
+            fill
+            sizes="100vw"
+            className="object-cover object-center brightness-75"
+            priority
+          />
+        </div>
+        <div className="relative z-10 text-center px-4 max-w-3xl pt-20">
+          <h1 className="text-4xl md:text-6xl font-serif text-white mb-6 drop-shadow-md">
+            El aroma de tu hogar, tu firma personal
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="text-lg md:text-xl text-white/90 mb-8 max-w-xl mx-auto drop-shadow">
+            Descubrí nuestra nueva colección de velas, difusores y objetos decorativos diseñados para elevar tus espacios.
           </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link 
+            href="/catalogo" 
+            className="inline-flex items-center px-8 py-4 bg-[var(--color-brand-green)] text-white font-medium hover:bg-[var(--color-brand-dark)] transition-colors uppercase tracking-wider text-sm shadow-lg rounded-sm"
           >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            Ver Catálogo
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Link>
         </div>
-      </main>
+      </section>
+
+      {/* Featured Products */}
+      <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full bg-[var(--color-brand-stone)]">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl font-serif text-[var(--color-brand-dark)] mb-4">Lo Más Elegido</h2>
+          <div className="h-1 w-20 bg-[var(--color-brand-mint)] mx-auto"></div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12">
+          {featuredProducts.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+        
+        <div className="mt-16 text-center">
+          <Link href="/catalogo" className="text-stone-900 font-medium hover:text-stone-500 uppercase tracking-wider text-sm underline underline-offset-8">
+            Ver Todos Los Productos
+          </Link>
+        </div>
+      </section>
+
+      {/* Review Section */}
+      <section className="bg-stone-100 py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl font-serif text-stone-900 mb-12">Lo que dicen de nosotros</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Reviews mockeadas basadas en Google Maps */}
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-white p-8 rounded shadow-sm flex flex-col items-center">
+                <div className="flex text-yellow-400 mb-4">
+                  {[...Array(5)].map((_, j) => <Star key={j} className="h-5 w-5 fill-current" />)}
+                </div>
+                <p className="text-stone-600 italic mb-6 text-sm flex-grow">
+                  "Excelente atención y los productos son de primera calidad. El aroma dura muchísimo tiempo en el ambiente."
+                </p>
+                <span className="font-medium text-stone-900 text-sm">- Cliente Verificado en Google</span>
+              </div>
+            ))}
+          </div>
+          <div className="mt-12">
+            <a 
+              href="https://maps.app.goo.gl/buTkyM12dxjJtHJh9" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-stone-500 hover:text-stone-900 text-sm font-medium underline"
+            >
+              Ver más reseñas en Google Maps
+            </a>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
