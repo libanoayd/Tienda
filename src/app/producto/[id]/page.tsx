@@ -57,12 +57,16 @@ export default function ProductoDetail({ params }: { params: Promise<{ id: strin
   }
 
   return (
-    <div className="min-h-screen bg-[var(--color-brand-stone)] pt-28 pb-24">
+    <div className="min-h-screen bg-[var(--color-brand-stone)] pt-36 pb-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* Botón Volver */}
-        <Link href="/catalogo" className="inline-flex items-center text-sm font-medium text-stone-600 hover:text-stone-900 mb-8 transition-colors">
-          <ArrowLeft className="mr-2 h-4 w-4" /> Volver al Catálogo
+        {/* Botón Volver destacado */}
+        <Link 
+          href="/catalogo" 
+          className="inline-flex items-center px-5 py-2.5 bg-white text-stone-700 hover:text-[var(--color-brand-dark)] hover:bg-stone-100 border border-stone-200 rounded-full font-medium text-sm shadow-sm transition-all mb-8 group"
+        >
+          <ArrowLeft className="mr-2 h-4 w-4 text-[var(--color-brand-green)] group-hover:-translate-x-1 transition-transform" /> 
+          Volver al Catálogo
         </Link>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 bg-white rounded-2xl p-8 shadow-sm border border-stone-200">
