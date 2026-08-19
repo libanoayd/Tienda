@@ -7,10 +7,10 @@ import { ProductCard } from "@/components/ProductCard";
 export default function Home() {
   // Productos mockeados para la fase inicial, usando las imagenes de la carpeta Productos PNG
   const featuredProducts = [
-    { id: 1, name: "Yagra", price: 4500, image: "/productos/yagra.png" },
-    { id: 2, name: "Caja Palo Santo", price: 8900, image: "/productos/palo-santo.png" },
-    { id: 3, name: "Incienso", price: 3200, image: "/productos/incienso.png" },
-    { id: 4, name: "Conos Aromáticos", price: 5400, image: "/productos/conos.png" },
+    { id: 1, name: "Yagra", price: 4500, image: "/productos/yagra.png", stock: 10 },
+    { id: 2, name: "Caja Palo Santo", price: 8900, image: "/productos/palo-santo.png", stock: 10 },
+    { id: 3, name: "Incienso", price: 3200, image: "/productos/incienso.png", stock: 10 },
+    { id: 4, name: "Conos Aromáticos", price: 5400, image: "/productos/conos.png", stock: 10 },
   ];
 
   return (

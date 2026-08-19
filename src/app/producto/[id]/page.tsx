@@ -25,14 +25,15 @@ export default function ProductoDetail({ params }: { params: Promise<{ id: strin
           name: data.name,
           price: data.price,
           image: data.image_url || "/productos/yagra.png",
+          stock: data.stock !== undefined ? data.stock : 10,
         });
       } else {
         // Fallback a los datos mockeados si no existe en Supabase aún
         const mockProducts: Record<number, Product> = {
-          1: { id: 1, name: "Yagra", price: 4500, image: "/productos/yagra.png" },
-          2: { id: 2, name: "Caja Palo Santo", price: 8900, image: "/productos/palo-santo.png" },
-          3: { id: 3, name: "Incienso", price: 3200, image: "/productos/incienso.png" },
-          4: { id: 4, name: "Conos Aromáticos", price: 5400, image: "/productos/conos.png" },
+          1: { id: 1, name: "Yagra", price: 4500, image: "/productos/yagra.png", stock: 10 },
+          2: { id: 2, name: "Caja Palo Santo", price: 8900, image: "/productos/palo-santo.png", stock: 10 },
+          3: { id: 3, name: "Incienso", price: 3200, image: "/productos/incienso.png", stock: 10 },
+          4: { id: 4, name: "Conos Aromáticos", price: 5400, image: "/productos/conos.png", stock: 10 },
         };
         setProduct(mockProducts[productId] || null);
       }
