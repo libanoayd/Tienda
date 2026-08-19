@@ -1,3 +1,7 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { LayoutDashboard, Package, Tag, Settings, LogOut } from "lucide-react";
 
@@ -6,6 +10,41 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    // Si estamos en la pantalla de login, no verificamos autenticación
+    if (pathname === "/admin/login") {
+      setIsAuthenticated(true);
+      return;
+    }
+
+    const auth = localStorage.getItem("libano_admin_auth");
+    if (auth === "true") {
+      setIsAuthenticated(true);
+    } else {
+      setIsAuthenticated(false);
+      router.push("/admin/login");
+    }
+  }, [pathname, router]);
+
+  const handleLogout = () => {
+    localStorage.removeItem("libano_admin_auth");
+    router.push("/admin/login");
+  };
+
+  // Si estamos en la página de login, mostramos solo el contenido de login
+  if (pathname === "/admin/login") {
+    return <>{children}</>;
+  }
+
+  // Mientras verifica autenticación, mostramos pantalla limpia
+  if (isAuthenticated === null || !isAuthenticated) {
+    return <div className="min-h-screen bg-stone-100 flex items-center justify-center text-stone-500">Verificando acceso...</div>;
+  }
+
   return (
     <div className="flex h-screen bg-stone-100">
       {/* Sidebar de Administración */}
@@ -16,26 +55,34 @@ export default function AdminLayout({
         </div>
         
         <nav className="flex-1 px-4 py-6 space-y-2">
-          <Link href="/admin" className="flex items-center px-4 py-3 bg-[var(--color-brand-green)] rounded-md transition-colors">
+          <Link 
+            href="/admin" 
+            className={`flex items-center px-4 py-3 rounded-md transition-colors ${pathname === '/admin' ? 'bg-[var(--color-brand-green)] text-white' : 'text-stone-300 hover:bg-stone-800'}`}
+          >
             <LayoutDashboard className="mr-3 h-5 w-5" />
             Dashboard
           </Link>
-          <Link href="/admin/productos" className="flex items-center px-4 py-3 text-stone-300 hover:bg-stone-800 hover:text-white rounded-md transition-colors">
+          <Link 
+            href="/admin/productos" 
+            className={`flex items-center px-4 py-3 rounded-md transition-colors ${pathname === '/admin/productos' ? 'bg-[var(--color-brand-green)] text-white' : 'text-stone-300 hover:bg-stone-800'}`}
+          >
             <Package className="mr-3 h-5 w-5" />
             Productos
           </Link>
-          <Link href="/admin/cupones" className="flex items-center px-4 py-3 text-stone-300 hover:bg-stone-800 hover:text-white rounded-md transition-colors">
+          <Link 
+            href="/admin/cupones" 
+            className={`flex items-center px-4 py-3 rounded-md transition-colors ${pathname === '/admin/cupones' ? 'bg-[var(--color-brand-green)] text-white' : 'text-stone-300 hover:bg-stone-800'}`}
+          >
             <Tag className="mr-3 h-5 w-5" />
             Cupones
-          </Link>
-          <Link href="/admin/configuracion" className="flex items-center px-4 py-3 text-stone-300 hover:bg-stone-800 hover:text-white rounded-md transition-colors">
-            <Settings className="mr-3 h-5 w-5" />
-            Configuración
           </Link>
         </nav>
 
         <div className="p-4 border-t border-stone-700">
-          <button className="flex items-center w-full px-4 py-2 text-stone-400 hover:text-white transition-colors">
+          <button 
+            onClick={handleLogout}
+            className="flex items-center w-full px-4 py-2 text-stone-400 hover:text-white hover:bg-stone-800 rounded-md transition-colors"
+          >
             <LogOut className="mr-3 h-5 w-5" />
             Cerrar Sesión
           </button>
