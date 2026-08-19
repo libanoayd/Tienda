@@ -9,7 +9,8 @@ const client = new MercadoPagoConfig({
 
 export async function POST(request: Request) {
   try {
-    const { items, total, userInfo } = await request.json();
+    const body = await request.json();
+    const { items, total, userInfo, deliveryInfo } = body;
 
     if (!items || items.length === 0) {
       return NextResponse.json({ error: "El carrito está vacío" }, { status: 400 });
@@ -33,7 +34,9 @@ export async function POST(request: Request) {
         user_email: userInfo?.email || "",
         user_phone: userInfo?.phone || "",
         total: total,
-        status: "pending"
+        status: "pending",
+        delivery_method: deliveryInfo?.method || 'retiro',
+        shipping_address: deliveryInfo?.address || null,
       })
       .select()
       .single();

@@ -1,16 +1,24 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { CheckCircle, ArrowRight } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
 
 export default function PagoExitoso() {
   const clearCart = useCartStore((state) => state.clearCart);
+  const [orderId, setOrderId] = useState<string | null>(null);
 
   useEffect(() => {
     // Limpiamos el carrito porque la compra ya se realizó
     clearCart();
+    
+    // Obtener número de orden de la URL (MercadoPago envía external_reference)
+    const searchParams = new URLSearchParams(window.location.search);
+    const externalRef = searchParams.get("external_reference");
+    if (externalRef) {
+      setOrderId(externalRef);
+    }
   }, [clearCart]);
 
   return (
@@ -23,6 +31,14 @@ export default function PagoExitoso() {
         <h2 className="text-3xl font-serif text-[var(--color-brand-dark)] mb-4">
           ¡Pago Exitoso!
         </h2>
+
+        {orderId && (
+          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+            <p className="text-sm text-green-800 font-medium mb-1 uppercase tracking-wider">Tu Número de Orden</p>
+            <p className="text-3xl font-bold text-green-900">#{orderId}</p>
+            <p className="text-xs text-green-700 mt-2">Por favor, guarda este número para cualquier consulta o para retirar tu pedido por el local.</p>
+          </div>
+        )}
         
         <p className="text-stone-600 mb-8 leading-relaxed">
           Tu pago ha sido procesado correctamente. Recibirás un correo electrónico de Mercado Pago con los detalles de la transacción. ¡Gracias por confiar en Líbano Aromas!

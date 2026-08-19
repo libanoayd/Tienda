@@ -19,6 +19,8 @@ export function CartSidebar() {
   const [userName, setUserName] = useState("");
   const [userEmail, setUserEmail] = useState("");
   const [userPhone, setUserPhone] = useState("");
+  const [deliveryMethod, setDeliveryMethod] = useState<'retiro' | 'envio'>('retiro');
+  const [shippingAddress, setShippingAddress] = useState("");
   const [isProcessingCheckout, setIsProcessingCheckout] = useState(false);
 
   const handleApplyCoupon = async (e: React.FormEvent) => {
@@ -82,21 +84,27 @@ export function CartSidebar() {
     setIsProcessingCheckout(true);
 
     try {
-      const res = await fetch("/api/checkout", {
+      const response = await fetch("/api/checkout", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          items,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ 
+          items, 
           total: finalTotal,
           userInfo: {
             name: userName,
             email: userEmail,
             phone: userPhone,
+          },
+          deliveryInfo: {
+            method: deliveryMethod,
+            address: deliveryMethod === 'envio' ? shippingAddress : null
           }
-        })
+        }),
       });
-      const data = await res.json();
-      if (!res.ok) {
+      const data = await response.json();
+      if (!response.ok) {
         console.error("Error de Checkout:", data);
         const errorMessage = data.details ? `${data.error}: ${JSON.stringify(data.details)}` : data.error || "Error al procesar el pago";
         throw new Error(errorMessage);
@@ -228,6 +236,20 @@ export function CartSidebar() {
             
             <form onSubmit={handleCheckout} className="space-y-3 border-t border-stone-200 pt-4">
               <h4 className="text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Tus datos para el pedido</h4>
+              
+              {/* Selector de Método de Entrega */}
+              <div className="flex flex-col space-y-2 mb-4 p-3 bg-white rounded-md border border-stone-200">
+                <label className="flex items-center space-x-2 text-sm text-stone-700 cursor-pointer">
+                  <input type="radio" name="deliveryMethod" value="retiro" checked={deliveryMethod === 'retiro'} onChange={() => setDeliveryMethod('retiro')} className="text-[var(--color-brand-green)] focus:ring-[var(--color-brand-green)]" />
+                  <span>Retiro en el local (Gratis)</span>
+                </label>
+                <label className="flex items-center space-x-2 text-sm text-stone-700 cursor-pointer">
+                  <input type="radio" name="deliveryMethod" value="envio" checked={deliveryMethod === 'envio'} onChange={() => setDeliveryMethod('envio')} className="text-[var(--color-brand-green)] focus:ring-[var(--color-brand-green)]" />
+                  <span>Envío a domicilio (A coordinar)</span>
+                </label>
+              </div>
+
+              {/* Campos de Contacto */}
               <div>
                 <input required type="text" placeholder="Nombre completo" value={userName} onChange={e => setUserName(e.target.value)} className="w-full px-3 py-2 text-sm border border-stone-300 rounded-md focus:ring-[var(--color-brand-green)] focus:border-[var(--color-brand-green)]" />
               </div>
@@ -235,13 +257,28 @@ export function CartSidebar() {
                 <input required type="email" placeholder="Correo electrónico" value={userEmail} onChange={e => setUserEmail(e.target.value)} className="w-full px-3 py-2 text-sm border border-stone-300 rounded-md focus:ring-[var(--color-brand-green)] focus:border-[var(--color-brand-green)]" />
               </div>
               <div>
-                <input required type="tel" placeholder="Teléfono" value={userPhone} onChange={e => setUserPhone(e.target.value)} className="w-full px-3 py-2 text-sm border border-stone-300 rounded-md focus:ring-[var(--color-brand-green)] focus:border-[var(--color-brand-green)]" />
+                <input required type="tel" placeholder="Teléfono / WhatsApp" value={userPhone} onChange={e => setUserPhone(e.target.value)} className="w-full px-3 py-2 text-sm border border-stone-300 rounded-md focus:ring-[var(--color-brand-green)] focus:border-[var(--color-brand-green)]" />
               </div>
+
+              {/* Campo de Envío Condicional */}
+              {deliveryMethod === 'envio' && (
+                <div className="pt-2 animate-in fade-in slide-in-from-top-2">
+                  <textarea 
+                    required 
+                    placeholder="Dirección completa y Código Postal. Ej: San Martín 123, CP 5500" 
+                    value={shippingAddress} 
+                    onChange={e => setShippingAddress(e.target.value)} 
+                    rows={2}
+                    className="w-full px-3 py-2 text-sm border border-stone-300 rounded-md focus:ring-[var(--color-brand-green)] focus:border-[var(--color-brand-green)]" 
+                  />
+                  <p className="text-[10px] text-stone-500 mt-1 leading-tight">Nos comunicaremos contigo por WhatsApp para coordinar el costo y horario de envío.</p>
+                </div>
+              )}
 
               <button 
                 type="submit"
                 disabled={isProcessingCheckout}
-                className="w-full bg-[var(--color-brand-green)] text-white px-6 py-4 rounded-md font-medium hover:bg-[var(--color-brand-dark)] transition-colors uppercase tracking-wider shadow-md text-sm mt-2 disabled:opacity-70"
+                className="w-full bg-[var(--color-brand-green)] text-white px-6 py-4 rounded-md font-medium hover:bg-[var(--color-brand-dark)] transition-colors uppercase tracking-wider shadow-md text-sm mt-4 disabled:opacity-70"
               >
                 {isProcessingCheckout ? "Procesando..." : "Iniciar Pago Seguro"}
               </button>

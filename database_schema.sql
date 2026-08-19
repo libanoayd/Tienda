@@ -58,6 +58,8 @@ CREATE TABLE orders (
   total NUMERIC NOT NULL,
   status TEXT DEFAULT 'pending', -- 'pending', 'paid', 'cancelled'
   payment_id TEXT,
+  delivery_method TEXT, -- 'retiro' or 'envio'
+  shipping_address TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
 );
 

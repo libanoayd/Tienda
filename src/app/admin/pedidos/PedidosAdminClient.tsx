@@ -9,6 +9,7 @@ interface OrderItem {
   product_name: string;
   quantity: number;
   price: number;
+  product?: { image_url: string };
 }
 
 interface Order {
@@ -19,6 +20,8 @@ interface Order {
   total: number;
   status: string;
   payment_id: string;
+  delivery_method?: string;
+  shipping_address?: string;
   created_at: string;
   items?: OrderItem[];
 }
@@ -34,12 +37,15 @@ export default function PedidosAdminClient() {
 
   async function fetchOrders() {
     setLoading(true);
-    // Fetch orders and their items
+    // Fetch orders and their items with product image
     const { data: ordersData, error } = await supabase
       .from("orders")
       .select(`
         *,
-        order_items (*)
+        order_items (
+          *,
+          product:products(image_url)
+        )
       `)
       .order("created_at", { ascending: false });
 
@@ -104,6 +110,7 @@ export default function PedidosAdminClient() {
                   <th className="p-4 font-medium">ID Pedido</th>
                   <th className="p-4 font-medium">Fecha</th>
                   <th className="p-4 font-medium">Cliente</th>
+                  <th className="p-4 font-medium">Entrega</th>
                   <th className="p-4 font-medium">Total</th>
                   <th className="p-4 font-medium">Estado</th>
                   <th className="p-4 font-medium text-right">Acciones</th>
@@ -123,6 +130,17 @@ export default function PedidosAdminClient() {
                         <div className="font-medium text-stone-900">{order.user_name}</div>
                         <div className="text-xs text-stone-500">{order.user_phone}</div>
                         <div className="text-xs text-stone-500">{order.user_email}</div>
+                      </td>
+                      <td className="p-4">
+                        {order.delivery_method === 'envio' ? (
+                          <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                            Envío a Domicilio
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-stone-200 text-stone-800">
+                            Retiro Local
+                          </span>
+                        )}
                       </td>
                       <td className="p-4 font-bold text-[var(--color-brand-terra)]">
                         ${order.total.toLocaleString("es-AR")}
@@ -144,21 +162,33 @@ export default function PedidosAdminClient() {
                     </tr>
                     {expandedOrder === order.id && (
                       <tr className="bg-stone-50 border-t-0">
-                        <td colSpan={6} className="p-6">
+                        <td colSpan={7} className="p-6">
+                          
+                          {order.delivery_method === 'envio' && order.shipping_address && (
+                            <div className="mb-6 p-4 bg-white border border-blue-100 rounded-md">
+                              <h4 className="font-bold text-stone-900 mb-1 uppercase text-xs tracking-wider text-blue-800">Dirección de Envío</h4>
+                              <p className="text-stone-700 whitespace-pre-line">{order.shipping_address}</p>
+                            </div>
+                          )}
+
                           <h4 className="font-bold text-stone-900 mb-4 uppercase text-xs tracking-wider">Artículos del Pedido</h4>
-                          <ul className="space-y-3">
+                          <ul className="space-y-4">
                             {order.items?.map(item => (
-                              <li key={item.id} className="flex justify-between items-center text-sm border-b border-stone-200 pb-2 last:border-0 last:pb-0">
-                                <div>
-                                  <span className="font-bold text-stone-900">{item.quantity}x</span>{" "}
-                                  <span className="text-stone-700">{item.product_name}</span>
+                              <li key={item.id} className="flex justify-between text-sm items-center">
+                                <div className="flex items-center">
+                                  {item.product?.image_url ? (
+                                    <img src={item.product.image_url} alt={item.product_name} className="w-12 h-12 object-cover rounded-md mr-4 border border-stone-200" />
+                                  ) : (
+                                    <div className="w-12 h-12 bg-stone-200 rounded-md mr-4 flex items-center justify-center text-stone-400 text-xs">Sin foto</div>
+                                  )}
+                                  <span className="font-medium">{item.quantity}x {item.product_name}</span>
                                 </div>
-                                <span className="font-medium text-stone-900">${(item.price * item.quantity).toLocaleString("es-AR")}</span>
+                                <span className="text-stone-500">${item.price.toLocaleString("es-AR")}</span>
                               </li>
                             ))}
                           </ul>
                           {order.payment_id && (
-                            <div className="mt-4 text-xs text-stone-500">
+                            <div className="mt-6 pt-4 border-t border-stone-200 text-xs text-stone-500">
                               Ref. MercadoPago: {order.payment_id}
                             </div>
                           )}
