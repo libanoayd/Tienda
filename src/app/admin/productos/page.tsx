@@ -2,30 +2,47 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { Plus, Edit2, Trash2, Image as ImageIcon, Save, X } from "lucide-react";
+import { Plus, Edit2, Trash2, Image as ImageIcon, Save, X, Tag, Box } from "lucide-react";
 
 interface Product {
   id?: number;
   name: string;
+  brand?: string;
+  presentation?: string;
   price: number;
   image_url: string;
+  category_id?: number;
   is_active?: boolean;
+}
+
+interface Category {
+  id: number;
+  name: string;
 }
 
 export default function AdminProductos() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
-  // Form State
+  // Form State con Variaciones
   const [name, setName] = useState("");
+  const [brand, setBrand] = useState("");
+  const [presentation, setPresentation] = useState("");
   const [price, setPrice] = useState("");
+  const [categoryId, setCategoryId] = useState("");
   const [imageUrl, setImageUrl] = useState("");
 
-  // Cargar productos desde Supabase
-  const fetchProducts = async () => {
+  const fetchData = async () => {
     setLoading(true);
+    
+    // Cargar Categorías
+    const { data: catData } = await supabase.from("categories").select("*");
+    if (catData) setCategories(catData);
+
+    // Cargar Productos
     const { data, error } = await supabase.from("products").select("*").order("id", { ascending: false });
     if (error) {
       console.error("Error al cargar productos:", error);
@@ -36,50 +53,52 @@ export default function AdminProductos() {
   };
 
   useEffect(() => {
-    fetchProducts();
+    fetchData();
   }, []);
 
-  // Guardar o Actualizar producto
   const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !price) return alert("Por favor completa el nombre y precio.");
 
     const productData = {
       name,
+      brand: brand || "Líbano",
+      presentation: presentation || "Unidad",
       price: parseFloat(price),
+      category_id: categoryId ? parseInt(categoryId) : null,
       image_url: imageUrl || "/productos/yagra.png",
     };
 
     if (editingProduct?.id) {
-      // Editar existente
       const { error } = await supabase.from("products").update(productData).eq("id", editingProduct.id);
       if (error) alert("Error al actualizar: " + error.message);
     } else {
-      // Crear nuevo
       const { error } = await supabase.from("products").insert([productData]);
       if (error) alert("Error al guardar: " + error.message);
     }
 
     setShowModal(false);
     resetForm();
-    fetchProducts();
+    fetchData();
   };
 
-  // Eliminar producto
   const handleDelete = async (id: number) => {
     if (!confirm("¿Estás segura de eliminar este producto?")) return;
     const { error } = await supabase.from("products").delete().eq("id", id);
     if (error) {
       alert("Error al eliminar: " + error.message);
     } else {
-      fetchProducts();
+      fetchData();
     }
   };
 
   const openEditModal = (product: Product) => {
     setEditingProduct(product);
     setName(product.name);
+    setBrand(product.brand || "");
+    setPresentation(product.presentation || "");
     setPrice(product.price.toString());
+    setCategoryId(product.category_id ? product.category_id.toString() : "");
     setImageUrl(product.image_url);
     setShowModal(true);
   };
@@ -87,7 +106,10 @@ export default function AdminProductos() {
   const resetForm = () => {
     setEditingProduct(null);
     setName("");
+    setBrand("");
+    setPresentation("");
     setPrice("");
+    setCategoryId("");
     setImageUrl("");
   };
 
@@ -95,8 +117,8 @@ export default function AdminProductos() {
     <div className="p-8">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-serif text-stone-900">Gestión de Productos</h1>
-          <p className="text-stone-500 text-sm mt-1">Agrega nuevos productos, cambia precios o elimina stock.</p>
+          <h1 className="text-3xl font-serif text-stone-900">Gestión de Productos y Variaciones</h1>
+          <p className="text-stone-500 text-sm mt-1">Carga productos especificando marca (Sagrada Madre, Just, etc.) y presentación.</p>
         </div>
         <button
           onClick={() => { resetForm(); setShowModal(true); }}
@@ -106,22 +128,23 @@ export default function AdminProductos() {
         </button>
       </div>
 
-      {/* Lista / Tabla de Productos */}
       <div className="bg-white rounded-xl shadow-sm border border-stone-200 overflow-hidden">
         {loading ? (
           <div className="p-12 text-center text-stone-500">Cargando catálogo...</div>
         ) : products.length === 0 ? (
           <div className="p-12 text-center text-stone-500">
-            No hay productos cargados todavía en la base de datos.
+            No hay productos cargados todavía en Supabase.
             <br />
-            <span className="text-xs text-stone-400">Nota: Asegúrate de haber corrido el script en el SQL Editor de Supabase.</span>
+            <span className="text-xs text-stone-400">Recuerda haber ejecutado el nuevo código en el SQL Editor de Supabase.</span>
           </div>
         ) : (
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-stone-50 border-b border-stone-200 text-stone-500 text-sm">
                 <th className="py-4 px-6 font-medium">Imagen</th>
-                <th className="py-4 px-6 font-medium">Nombre</th>
+                <th className="py-4 px-6 font-medium">Producto</th>
+                <th className="py-4 px-6 font-medium">Marca</th>
+                <th className="py-4 px-6 font-medium">Presentación</th>
                 <th className="py-4 px-6 font-medium">Precio</th>
                 <th className="py-4 px-6 font-medium text-right">Acciones</th>
               </tr>
@@ -139,6 +162,16 @@ export default function AdminProductos() {
                     </div>
                   </td>
                   <td className="py-3 px-6 font-medium text-stone-900">{product.name}</td>
+                  <td className="py-3 px-6 text-stone-600">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-stone-100 text-stone-800">
+                      <Tag className="h-3 w-3 mr-1" /> {product.brand || "Líbano"}
+                    </span>
+                  </td>
+                  <td className="py-3 px-6 text-stone-600">
+                    <span className="inline-flex items-center text-xs text-stone-500">
+                      <Box className="h-3 w-3 mr-1" /> {product.presentation || "Unidad"}
+                    </span>
+                  </td>
                   <td className="py-3 px-6 font-semibold text-[var(--color-brand-terra)]">
                     ${product.price.toLocaleString("es-AR")}
                   </td>
@@ -146,14 +179,12 @@ export default function AdminProductos() {
                     <button
                       onClick={() => openEditModal(product)}
                       className="p-2 text-stone-600 hover:text-[var(--color-brand-green)] hover:bg-stone-100 rounded-md transition-colors"
-                      title="Editar precio o nombre"
                     >
                       <Edit2 className="h-4 w-4" />
                     </button>
                     <button
                       onClick={() => product.id && handleDelete(product.id)}
                       className="p-2 text-stone-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
-                      title="Eliminar"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -165,13 +196,12 @@ export default function AdminProductos() {
         )}
       </div>
 
-      {/* Modal para Crear / Editar Producto */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-xl relative">
+          <div className="bg-white rounded-xl max-w-lg w-full p-6 shadow-xl relative max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-serif text-stone-900">
-                {editingProduct ? "Editar Producto" : "Nuevo Producto"}
+                {editingProduct ? "Editar Producto" : "Nuevo Producto con Variación"}
               </h2>
               <button onClick={() => setShowModal(false)} className="text-stone-400 hover:text-stone-600">
                 <X className="h-6 w-6" />
@@ -185,31 +215,71 @@ export default function AdminProductos() {
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Ej: Sahumerios Canela"
+                  placeholder="Ej: Incienso Natural Yagra"
                   className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-[var(--color-brand-green)] focus:outline-none"
                   required
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Precio ($ ARS)</label>
-                <input
-                  type="number"
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value)}
-                  placeholder="Ej: 4500"
-                  className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-[var(--color-brand-green)] focus:outline-none"
-                  required
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-stone-700 mb-1">Marca / Proveedor</label>
+                  <input
+                    type="text"
+                    value={brand}
+                    onChange={(e) => setBrand(e.target.value)}
+                    placeholder="Ej: Sagrada Madre, Just, Tera India"
+                    className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-[var(--color-brand-green)] focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-stone-700 mb-1">Presentación</label>
+                  <input
+                    type="text"
+                    value={presentation}
+                    onChange={(e) => setPresentation(e.target.value)}
+                    placeholder="Ej: Caja x 8 varillas, 10ml"
+                    className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-[var(--color-brand-green)] focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-stone-700 mb-1">Precio ($ ARS)</label>
+                  <input
+                    type="number"
+                    value={price}
+                    onChange={(e) => setPrice(e.target.value)}
+                    placeholder="Ej: 4500"
+                    className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-[var(--color-brand-green)] focus:outline-none"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-stone-700 mb-1">Categoría / Sección</label>
+                  <select
+                    value={categoryId}
+                    onChange={(e) => setCategoryId(e.target.value)}
+                    className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-[var(--color-brand-green)] focus:outline-none bg-white"
+                  >
+                    <option value="">-- Seleccionar --</option>
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.id}>{cat.name}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">URL de la Imagen (Opcional)</label>
+                <label className="block text-sm font-medium text-stone-700 mb-1">URL de la Imagen</label>
                 <input
                   type="text"
                   value={imageUrl}
                   onChange={(e) => setImageUrl(e.target.value)}
-                  placeholder="Ej: /productos/yagra.png o link directo"
+                  placeholder="Ej: /productos/yagra.png o enlace"
                   className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-[var(--color-brand-green)] focus:outline-none text-xs"
                 />
               </div>
@@ -226,7 +296,7 @@ export default function AdminProductos() {
                   type="submit"
                   className="flex items-center px-5 py-2 bg-[var(--color-brand-green)] text-white rounded-lg text-sm font-medium hover:bg-[var(--color-brand-dark)] transition-colors"
                 >
-                  <Save className="mr-2 h-4 w-4" /> Guardar
+                  <Save className="mr-2 h-4 w-4" /> Guardar Producto
                 </button>
               </div>
             </form>
