@@ -9,6 +9,7 @@ Este es el repositorio oficial del e-commerce para **Líbano Aromas y Decoració
 * **Base de Datos & Auth:** Supabase (PostgreSQL)
 * **Pasarela de Pago:** Mercado Pago SDK v2
 * **Iconos:** Lucide React
+* **Hosting:** Vercel
 
 ## 🚀 Actualizaciones y Progreso (Changelog)
 
@@ -19,7 +20,7 @@ Este es el repositorio oficial del e-commerce para **Líbano Aromas y Decoració
 - [x] Incorporación del logo transparente oficial (SVG / PNG).
 
 ### Fase 2: Navegación y UI
-- [x] Barra de navegación (`Navbar.tsx`) con efecto transparente inicial y transición a blanco al hacer scroll (sticky).
+- [x] Barra de navegación (`Navbar.tsx`) con efecto transparente inicial y transición a blanco al hacer scroll (sticky). Oculta automáticamente en la sección administrativa `/admin`.
 - [x] Botón flotante de WhatsApp configurado con el número oficial (`+5492612526299`).
 - [x] Portada (Hero) dinámica con fotografía de alta calidad generada por IA que representa el nicho del negocio.
 
@@ -33,12 +34,15 @@ Este es el repositorio oficial del e-commerce para **Líbano Aromas y Decoració
 - [x] Integración del SDK de **Mercado Pago** en el backend.
 - [x] Creación del endpoint `/api/checkout` que genera la Preferencia de Pago en base a los ítems del carrito y devuelve el link de redirección.
 
-### Fase 5: Panel de Administración (Arquitectura Híbrida)
-- [x] Maquetado del panel de control privado (`/admin`) utilizando referencias de diseño de sistemas complejos (Edutec).
-- [x] Creación de `database_schema.sql` con la estructura de tablas para Supabase (products, categories, coupons).
-- [x] Enlace inicial con el SDK de Supabase (`lib/supabase.ts`).
+### Fase 5: Panel de Administración (Gestión Interactiva)
+- [x] Maquetado del panel de control privado (`/admin`) con métricas y diseño responsivo.
+- [x] Creación del módulo de **Gestión de Productos** (`/admin/productos`):
+  - Creación de nuevos productos.
+  - Edición en tiempo real de nombres y precios.
+  - Eliminación de productos.
+- [x] Creación de `database_schema.sql` para inicialización de la base de datos de Supabase.
+- [x] Conexión activa con el cliente de Supabase (`lib/supabase.ts`) usando las llaves de producción.
 
-## ⚙️ Pasos Pendientes para despliegue final
-1. Copiar y ejecutar el contenido de `database_schema.sql` en el SQL Editor de Supabase.
-2. Completar las variables secretas en `.env.local` (Mercado Pago Access Token y Supabase Anon Key).
-3. Conectar el Frontend del Panel de Administración con las tablas creadas en Supabase para poder crear y borrar productos visualmente.
+## ⚙️ Pasos Siguientes
+1. Ejecutar el código SQL en Supabase para habilitar las tablas de producción.
+2. Cargar los primeros productos reales mediante la interfaz de `/admin/productos`.

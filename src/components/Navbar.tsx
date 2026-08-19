@@ -3,10 +3,12 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ShoppingBag, Menu, X } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { ShoppingBag, Menu } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
 
 export function Navbar() {
+  const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
   const cartCount = useCartStore((state) => state.getCartCount());
   const toggleCart = useCartStore((state) => state.toggleCart);
@@ -18,6 +20,11 @@ export function Navbar() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Si estamos dentro del panel de administración (/admin), no mostramos el menú de la tienda
+  if (pathname?.startsWith("/admin")) {
+    return null;
+  }
 
   return (
     <header 
