@@ -91,8 +91,15 @@ export async function POST(request: Request) {
     // Devolvemos el link de pago (init_point) al frontend
     return NextResponse.json({ init_point: response.init_point });
     
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error al crear preferencia de Mercado Pago:", error);
-    return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
+    
+    // Si el error tiene un response de la API de Mercado Pago, lo enviamos
+    const mpError = error.response ? error.response : error.message;
+    
+    return NextResponse.json({ 
+      error: "Error interno del servidor", 
+      details: mpError 
+    }, { status: 500 });
   }
 }

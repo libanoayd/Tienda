@@ -96,6 +96,11 @@ export function CartSidebar() {
         })
       });
       const data = await res.json();
+      if (!res.ok) {
+        console.error("Error de Checkout:", data);
+        const errorMessage = data.details ? `${data.error}: ${JSON.stringify(data.details)}` : data.error || "Error al procesar el pago";
+        throw new Error(errorMessage);
+      }
       if (data.init_point) {
         window.location.href = data.init_point;
       } else {
@@ -103,7 +108,7 @@ export function CartSidebar() {
       }
     } catch (error) {
       console.error(error);
-      alert("Hubo un error al iniciar el pago.");
+      alert(error instanceof Error ? error.message : "Hubo un error al iniciar el pago.");
     } finally {
       setIsProcessingCheckout(false);
     }
