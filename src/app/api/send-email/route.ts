@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server";
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
 import { createClient } from "@supabase/supabase-js";
 
 export async function POST(request: Request) {
   try {
-    const resend = new Resend(process.env.RESEND_API_KEY || "re_dummy");
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -27,9 +26,18 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Orden no encontrada" }, { status: 404 });
     }
 
-    // Configurar correo a enviar
-    const emailData = await resend.emails.send({
-      from: "Líbano Aromas <ventas@resend.dev>", // Usaremos resend.dev para pruebas hasta que verifiquen dominio
+    // Configurar Nodemailer con Gmail
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_PASS, // La contraseña de aplicación de 16 caracteres
+      },
+    });
+
+    // Enviar el correo
+    const mailOptions = {
+      from: `"Líbano Aromas y Decoración" <${process.env.GMAIL_USER}>`,
       to: order.user_email,
       subject: `¡Confirmación de tu pedido #${order.id} en Líbano!`,
       html: `
@@ -52,9 +60,11 @@ export async function POST(request: Request) {
           <p style="font-size: 12px; color: #666;">Líbano Aromas y Decoración</p>
         </div>
       `,
-    });
+    };
 
-    return NextResponse.json({ success: true, emailData });
+    const info = await transporter.sendMail(mailOptions);
+
+    return NextResponse.json({ success: true, messageId: info.messageId });
   } catch (error) {
     console.error("Error enviando email:", error);
     return NextResponse.json({ error: "Fallo al enviar correo" }, { status: 500 });
