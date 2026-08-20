@@ -11,6 +11,54 @@ interface Category {
   parent_id?: number | null;
 }
 
+const CategoryRow = ({ category, allCategories, level, onEdit, onDelete }: any) => {
+  const children = allCategories.filter((c: Category) => c.parent_id === category.id);
+  const paddingLeft = level === 0 ? "px-6" : `px-6`;
+  const customIndent = level > 0 ? { paddingLeft: `${1.5 * level + 1.5}rem` } : {};
+
+  return (
+    <React.Fragment>
+      <tr className={`hover:bg-stone-50/50 transition-colors ${level === 0 ? 'bg-stone-50/30' : ''}`}>
+        <td className={`py-${level === 0 ? '4' : '3'} ${paddingLeft} font-${level === 0 ? 'semibold' : 'medium'} text-${level === 0 ? '[var(--color-brand-dark)]' : 'stone-700'} flex items-center`} style={customIndent}>
+          {level === 0 ? (
+            <FolderPlus className="h-4 w-4 mr-3 text-[var(--color-brand-green)]" />
+          ) : (
+            <CornerDownRight className="h-4 w-4 mr-2 text-stone-300" />
+          )}
+          {category.name}
+        </td>
+        <td className={`py-${level === 0 ? '4' : '3'} px-6 text-${level === 0 ? 'stone-500' : 'stone-400'} font-mono text-xs`}>
+          {category.slug}
+        </td>
+        <td className={`py-${level === 0 ? '4' : '3'} px-6 text-right space-x-2`}>
+          <button
+            onClick={() => onEdit(category)}
+            className="p-2 text-stone-600 hover:text-[var(--color-brand-green)] hover:bg-stone-100 rounded-md transition-colors"
+          >
+            <Edit2 className="h-4 w-4" />
+          </button>
+          <button
+            onClick={() => category.id && onDelete(category.id)}
+            className="p-2 text-stone-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        </td>
+      </tr>
+      {children.map((child: Category) => (
+        <CategoryRow 
+          key={child.id} 
+          category={child} 
+          allCategories={allCategories} 
+          level={level + 1} 
+          onEdit={onEdit} 
+          onDelete={onDelete} 
+        />
+      ))}
+    </React.Fragment>
+  );
+};
+
 export default function AdminCategorias() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -130,58 +178,14 @@ export default function AdminCategorias() {
             </thead>
             <tbody className="divide-y divide-stone-100 text-sm">
               {parentCategories.map((parent) => (
-                <React.Fragment key={parent.id}>
-                  {/* Categoría Padre */}
-                  <tr className="hover:bg-stone-50/50 transition-colors bg-stone-50/30">
-                    <td className="py-4 px-6 font-semibold text-[var(--color-brand-dark)] flex items-center">
-                      <FolderPlus className="h-4 w-4 mr-3 text-[var(--color-brand-green)]" />
-                      {parent.name}
-                    </td>
-                    <td className="py-4 px-6 text-stone-500 font-mono text-xs">
-                      {parent.slug}
-                    </td>
-                    <td className="py-4 px-6 text-right space-x-2">
-                      <button
-                        onClick={() => openEditModal(parent)}
-                        className="p-2 text-stone-600 hover:text-[var(--color-brand-green)] hover:bg-stone-100 rounded-md transition-colors"
-                      >
-                        <Edit2 className="h-4 w-4" />
-                      </button>
-                      <button
-                        onClick={() => parent.id && handleDelete(parent.id)}
-                        className="p-2 text-stone-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </td>
-                  </tr>
-                  {/* Subcategorías */}
-                  {categories.filter(c => c.parent_id === parent.id).map(sub => (
-                    <tr key={sub.id} className="hover:bg-stone-50/50 transition-colors">
-                      <td className="py-3 px-6 pl-12 font-medium text-stone-700 flex items-center">
-                        <CornerDownRight className="h-4 w-4 mr-2 text-stone-300" />
-                        {sub.name}
-                      </td>
-                      <td className="py-3 px-6 text-stone-400 font-mono text-xs">
-                        {sub.slug}
-                      </td>
-                      <td className="py-3 px-6 text-right space-x-2">
-                        <button
-                          onClick={() => openEditModal(sub)}
-                          className="p-2 text-stone-600 hover:text-[var(--color-brand-green)] hover:bg-stone-100 rounded-md transition-colors"
-                        >
-                          <Edit2 className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={() => sub.id && handleDelete(sub.id)}
-                          className="p-2 text-stone-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </React.Fragment>
+                <CategoryRow 
+                  key={parent.id} 
+                  category={parent} 
+                  allCategories={categories}
+                  level={0}
+                  onEdit={openEditModal}
+                  onDelete={handleDelete}
+                />
               ))}
             </tbody>
           </table>
@@ -221,8 +225,10 @@ export default function AdminCategorias() {
                   className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-[var(--color-brand-green)] focus:outline-none"
                 >
                   <option value="">Ninguna (Es una Categoría Principal)</option>
-                  {parentCategories.map(cat => (
-                    <option key={cat.id} value={cat.id}>{cat.name}</option>
+                  {categories.map(cat => (
+                    <option key={cat.id} value={cat.id || ""}>
+                      {cat.name}
+                    </option>
                   ))}
                 </select>
               </div>
