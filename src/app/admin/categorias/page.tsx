@@ -94,6 +94,10 @@ export default function AdminCategorias() {
       .replace(/[^\w\s-]/g, "")
       .replace(/[\s_-]+/g, "-");
 
+    if (editingCategory?.id && parentId === editingCategory.id) {
+      return alert("Una categoría no puede ser subcategoría de sí misma.");
+    }
+
     const payload = { 
       name: name.trim(), 
       slug, 
@@ -225,10 +229,12 @@ export default function AdminCategorias() {
                   className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-[var(--color-brand-green)] focus:outline-none"
                 >
                   <option value="">Ninguna (Es una Categoría Principal)</option>
-                  {categories.map(cat => (
-                    <option key={cat.id} value={cat.id || ""}>
-                      {cat.name}
-                    </option>
+                  {categories
+                    .filter(cat => cat.id !== editingCategory?.id)
+                    .map(cat => (
+                      <option key={cat.id} value={cat.id || ""}>
+                        {cat.name}
+                      </option>
                   ))}
                 </select>
               </div>
