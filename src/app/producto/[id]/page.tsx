@@ -105,9 +105,14 @@ export default function ProductoDetail({ params }: { params: Promise<{ id: strin
             {/* Botón Agregar al Carrito */}
             <button
               onClick={() => addToCart(product)}
-              className="w-full flex items-center justify-center px-8 py-4 bg-[var(--color-brand-green)] text-white font-medium hover:bg-[var(--color-brand-dark)] transition-colors uppercase tracking-wider text-sm shadow-lg rounded-lg mb-8"
+              disabled={product.stock <= 0}
+              className={`w-full flex items-center justify-center px-8 py-4 font-medium uppercase tracking-wider text-sm shadow-lg rounded-lg mb-8 transition-colors
+                ${product.stock > 0 
+                  ? "bg-[var(--color-brand-green)] text-white hover:bg-[var(--color-brand-dark)]" 
+                  : "bg-stone-300 text-stone-500 cursor-not-allowed"}`}
             >
-              <ShoppingBag className="mr-3 h-5 w-5" /> Añadir al Carrito
+              <ShoppingBag className="mr-3 h-5 w-5" /> 
+              {product.stock > 0 ? "Añadir al Carrito" : "Agotado"}
             </button>
 
             {/* Beneficios */}
