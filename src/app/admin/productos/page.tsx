@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { Plus, Edit2, Trash2, Image as ImageIcon, Save, X, Tag, Box, Hash } from "lucide-react";
+import { Plus, Edit2, Trash2, Image as ImageIcon, Save, X, Tag, Box, Hash, Folder, FileImage, Loader2, ArrowLeft } from "lucide-react";
 
 interface Product {
   id?: number;
@@ -39,6 +39,12 @@ export default function AdminProductos() {
   const [imageUrl, setImageUrl] = useState("");
   const [description, setDescription] = useState("");
 
+  // Google Drive Gallery State
+  const [showDriveGallery, setShowDriveGallery] = useState(false);
+  const [driveFiles, setDriveFiles] = useState<any[]>([]);
+  const [driveHistory, setDriveHistory] = useState<string[]>(["1ea_JtBvrukki8S0nQQ91wKAjQQyrOWQR"]);
+  const [loadingDrive, setLoadingDrive] = useState(false);
+
   const fetchData = async () => {
     setLoading(true);
     
@@ -59,6 +65,57 @@ export default function AdminProductos() {
   useEffect(() => {
     fetchData();
   }, []);
+
+  const fetchDriveFolder = async (folderId: string) => {
+    setLoadingDrive(true);
+    try {
+      const res = await fetch(`/api/drive?folderId=${folderId}`);
+      const data = await res.json();
+      if (res.ok) {
+        // Ordenar: Carpetas primero, luego archivos
+        const sorted = (data.files || []).sort((a: any, b: any) => {
+          if (a.mimeType === "application/vnd.google-apps.folder" && b.mimeType !== "application/vnd.google-apps.folder") return -1;
+          if (a.mimeType !== "application/vnd.google-apps.folder" && b.mimeType === "application/vnd.google-apps.folder") return 1;
+          return a.name.localeCompare(b.name);
+        });
+        setDriveFiles(sorted);
+      } else {
+        alert("Error cargando Drive: " + data.error);
+      }
+    } catch (err: any) {
+      alert("Error de red cargando Drive");
+    }
+    setLoadingDrive(false);
+  };
+
+  const openDriveGallery = () => {
+    setShowDriveGallery(true);
+    if (driveFiles.length === 0) {
+      fetchDriveFolder(driveHistory[driveHistory.length - 1]);
+    }
+  };
+
+  const handleDriveFolderClick = (folderId: string) => {
+    const newHistory = [...driveHistory, folderId];
+    setDriveHistory(newHistory);
+    fetchDriveFolder(folderId);
+  };
+
+  const handleDriveBack = () => {
+    if (driveHistory.length > 1) {
+      const newHistory = [...driveHistory];
+      newHistory.pop();
+      setDriveHistory(newHistory);
+      fetchDriveFolder(newHistory[newHistory.length - 1]);
+    }
+  };
+
+  const handleSelectDriveImage = (file: any) => {
+    // Usar el thumbnail de alta resolución
+    const directLink = `https://drive.google.com/thumbnail?id=${file.id}&sz=w800`;
+    setImageUrl(directLink);
+    setShowDriveGallery(false);
+  };
 
   const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -320,13 +377,22 @@ export default function AdminProductos() {
 
               <div>
                 <label className="block text-sm font-medium text-stone-700 mb-1">URL de la Imagen</label>
-                <input
-                  type="text"
-                  value={imageUrl}
-                  onChange={(e) => setImageUrl(e.target.value)}
-                  placeholder="Ej: /productos/yagra.png o enlace"
-                  className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-[var(--color-brand-green)] focus:outline-none text-xs"
-                />
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={imageUrl}
+                    onChange={(e) => setImageUrl(e.target.value)}
+                    placeholder="Pega el link o busca en Drive ->"
+                    className="flex-1 px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-[var(--color-brand-green)] focus:outline-none text-xs"
+                  />
+                  <button
+                    type="button"
+                    onClick={openDriveGallery}
+                    className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors whitespace-nowrap"
+                  >
+                    <Folder className="h-4 w-4 mr-2" /> Explorar Drive
+                  </button>
+                </div>
               </div>
 
               <div className="pt-4 flex justify-end space-x-3 border-t border-stone-100">
@@ -345,6 +411,71 @@ export default function AdminProductos() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Explorador de Google Drive */}
+      {showDriveGallery && (
+        <div className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl max-w-4xl w-full p-6 shadow-xl relative max-h-[90vh] flex flex-col">
+            <div className="flex justify-between items-center mb-4 border-b pb-4">
+              <div className="flex items-center">
+                {driveHistory.length > 1 && (
+                  <button onClick={handleDriveBack} className="mr-4 p-2 hover:bg-stone-100 rounded-full transition">
+                    <ArrowLeft className="h-5 w-5 text-stone-600" />
+                  </button>
+                )}
+                <h2 className="text-xl font-serif text-stone-900 flex items-center">
+                  <Folder className="h-6 w-6 mr-2 text-blue-500" /> Explorador de Google Drive
+                </h2>
+              </div>
+              <button onClick={() => setShowDriveGallery(false)} className="text-stone-400 hover:text-stone-600">
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto min-h-[300px]">
+              {loadingDrive ? (
+                <div className="h-full flex flex-col items-center justify-center text-stone-500 space-y-4 py-20">
+                  <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+                  <p>Leyendo tu Google Drive...</p>
+                </div>
+              ) : driveFiles.length === 0 ? (
+                <div className="text-center py-20 text-stone-500">
+                  Carpeta vacía o sin permisos.
+                </div>
+              ) : (
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">
+                  {driveFiles.map((file) => (
+                    <div 
+                      key={file.id}
+                      onClick={() => {
+                        if (file.mimeType === "application/vnd.google-apps.folder") {
+                          handleDriveFolderClick(file.id);
+                        } else {
+                          handleSelectDriveImage(file);
+                        }
+                      }}
+                      className="group cursor-pointer flex flex-col items-center p-3 rounded-xl hover:bg-blue-50 border border-transparent hover:border-blue-100 transition-all text-center"
+                    >
+                      {file.mimeType === "application/vnd.google-apps.folder" ? (
+                        <Folder className="h-16 w-16 text-blue-400 group-hover:text-blue-500 mb-2 transition-colors" />
+                      ) : file.thumbnailLink ? (
+                        <div className="h-16 w-16 mb-2 rounded shadow-sm bg-stone-100 overflow-hidden relative">
+                          <img src={file.thumbnailLink} alt={file.name} className="object-cover w-full h-full" />
+                        </div>
+                      ) : (
+                        <FileImage className="h-16 w-16 text-stone-300 mb-2" />
+                      )}
+                      <span className="text-xs text-stone-600 font-medium truncate w-full px-1" title={file.name}>
+                        {file.name}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
