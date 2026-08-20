@@ -10,6 +10,7 @@ const inter = Inter({ subsets: ["latin"] });
 import { Navbar } from "@/components/Navbar";
 import { CartSidebar } from "@/components/CartSidebar";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
+import { Analytics } from "@vercel/analytics/react";
 
 export const metadata: Metadata = {
   title: "Líbano | Aromas y Decoración",
@@ -24,6 +25,7 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className={`${inter.className} min-h-screen flex flex-col bg-[var(--color-brand-stone)] text-[var(--color-brand-dark)]`}>
+        <Analytics />
         <Navbar />
         <CartSidebar />
         
