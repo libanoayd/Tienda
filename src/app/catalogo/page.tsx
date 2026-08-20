@@ -64,9 +64,21 @@ export default function Catalogo() {
   const filteredAndSortedProducts = useMemo(() => {
     let result = [...products];
 
+    // Helper para obtener la categoría y todos sus hijos/nietos
+    const getAllCategoryIds = (parentId: number): number[] => {
+      let ids = [parentId];
+      const children = categories.filter((c) => c.parent_id === parentId);
+      for (const child of children) {
+        ids = [...ids, ...getAllCategoryIds(child.id)];
+      }
+      return ids;
+    };
+
     // 1. Filtrar por Categoría
     if (selectedCategory !== "todos") {
-      result = result.filter((p: any) => p.category_id === parseInt(selectedCategory));
+      const selectedId = parseInt(selectedCategory);
+      const allowedCategoryIds = getAllCategoryIds(selectedId);
+      result = result.filter((p: any) => allowedCategoryIds.includes(p.category_id));
     }
 
     // 2. Filtrar por Búsqueda
