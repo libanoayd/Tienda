@@ -7,7 +7,8 @@ Este es el repositorio oficial del e-commerce para **Líbano Aromas y Decoració
 * **Estilos:** Tailwind CSS
 * **Estado Global (Carrito):** Zustand
 * **Base de Datos & Auth:** Supabase (PostgreSQL)
-* **Pasarela de Pago:** Mercado Pago SDK v2
+* **Pasarela de Pago:** Mercado Pago SDK v3
+* **Cotizador de Envíos:** Zipnova API v2
 * **Iconos:** Lucide React
 * **Hosting:** Vercel
 
@@ -15,30 +16,28 @@ Este es el repositorio oficial del e-commerce para **Líbano Aromas y Decoració
 
 ### Interfaz Pública y Ventas
 - **Portada Dinámica:** Se conecta a Supabase para mostrar en tiempo real los últimos 4 productos agregados al inventario.
-- **Catálogo Inteligente:** Filtros por categoría y subcategorías jerárquicas.
-- **Carrito de Compras (Zustand):** Sidebar lateral para gestionar cantidades, aplicar cupones de descuento y visualizar totales sin recargar la página.
+- **Catálogo Inteligente Recursivo:** Filtros por categoría que incluyen automáticamente todos los productos de las subcategorías "hijas" asociadas.
+- **Carrito de Compras (Zustand):** Sidebar lateral ultra optimizado para gestionar cantidades y precios dinámicamente.
 - **Páginas Informativas:** Sección "Nosotros" detallando la filosofía de la marca e información de Contacto/Ubicación interactiva.
 - **Botón de WhatsApp:** Integrado para consultas rápidas.
 
-### 💳 Checkout y Pagos (Mercado Pago)
-- **Integración de Preferencias MP:** Cálculo exacto de precios y descuentos enviados a la pasarela con `auto_return` dinámico basado en el entorno de ejecución (Vercel).
-- **Manejo de Errores Detallado:** Captura de fallos de la API de Mercado Pago para notificar al cliente el motivo exacto del rechazo.
-- **Páginas de Retorno Automático:**
-  - `pago-exitoso`: Vacía el carrito automáticamente y le otorga un "Número de Orden" claro al cliente.
-  - `pago-pendiente`: Para pagos en efectivo (RapiPago / PagoFácil).
-  - `pago-fallido`: Permite volver a intentar el pago.
-- **Opciones de Entrega:** El cliente puede seleccionar en el carrito entre **Retiro en Local (Gratis)** o **Envío a Domicilio (A coordinar)**.
+### 🚚 Envíos y Logística
+- **Cotizador Automático (Zipnova):** Al ingresar el Código Postal en el carrito, el sistema se conecta por detrás de escena a Zipnova para ofrecer tarifas reales (Correo Argentino, Andreani, OCA, etc.) basadas en el valor del carrito para asegurar el paquete.
+- **Suma al Checkout:** El costo de logística seleccionado se suma automáticamente a la pasarela de pagos.
+- **Retiro en Local:** Opción gratuita que no requiere código postal.
+
+### 💳 Checkout, Pagos y Promociones
+- **Integración de Preferencias Mercado Pago:** Cálculo exacto de precios. Parche dinámico del `origin` para evitar errores de URLs en `auto_return` tanto en producción como local.
+- **Cupones Multi-nivel:** Soporte para cupones que aplican descuentos globales, descuentos exclusivos para toda una categoría, o descuentos enfocados a un único producto específico.
+- **Páginas de Retorno Automático:** Vaciado de carrito y confirmación visual al volver desde Mercado Pago.
 
 ### ⚙️ Panel de Administrador (`/admin`)
 - **Dashboard Estadístico:** Métricas en tiempo real conectadas a Supabase.
-- **Gestión de Pedidos:** 
-  - Visualización de compras con fotos miniatura de cada artículo de la orden.
-  - Identificación del método de entrega (Retiro / Envío).
-  - Resaltado de la dirección de envío del cliente.
-  - Generación de Número de Orden atado a Mercado Pago.
-- **Inventario y Productos:** ABM (Alta, Baja, Modificación) conectado a Supabase con control de stock real.
-- **Gestión de Categorías:** Soporte para Subcategorías (jerarquías `parent_id` en Supabase).
-- **Configuración de Tienda:** Permite cambiar fácilmente (en múltiples líneas) el horario de atención de la tienda física (ej. Lunes a Viernes de 09:00 a 13:00 y de 16:30 a 18:30).
+- **Gestión Inteligente de Pedidos:** 
+  - Visualización de compras con fotos de cada artículo, ocultando automáticamente los "Carritos abandonados" (pedidos pendientes sin pagar) para mantener limpio el panel.
+- **Gestión de Categorías Recursivas:** Creación de subcategorías con validación anti-ciclos infinitos (una categoría no puede ser hija de sí misma). Interfaz con indentado visual (`└`) en forma de árbol.
+- **Inventario y Productos:** ABM completo conectado a Supabase.
+- **Configuración de Tienda:** Horarios editables dinámicamente.
 
 ## 🛠️ Configuración Inicial
 Si vas a clonar el repositorio, asegúrate de configurar las siguientes variables en un archivo `.env.local` y en Vercel:
@@ -51,6 +50,5 @@ MP_ACCESS_TOKEN=tu_access_token_de_mercado_pago
 
 El esquema completo de la base de datos se encuentra en `database_schema.sql` (Ejecutar en el SQL Editor de Supabase).
 
-## 📷 ¿Dónde almacenar las fotos de los productos?
-1. **Opción A (Archivos locales):** Puedes guardar imágenes dentro de `public/productos/`. La URL a registrar en el panel será `/productos/nombre.jpg`.
-2. **Opción B (Recomendada - Supabase Storage):** Sube la foto a un Bucket (ej. `products-images`) en Supabase y pega la URL pública generada directamente en la ficha del producto en el panel de administrador.
+## 📷 Almacenamiento
+Imágenes servidas gratuitamente mediante enlaces directos optimizados (`?sz=w800`) desde Google Drive, sin costos de hosting por almacenamiento en Supabase/Vercel.
