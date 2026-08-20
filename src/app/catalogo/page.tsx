@@ -10,6 +10,7 @@ interface Category {
   id: number;
   name: string;
   slug: string;
+  parent_id: number | null;
 }
 
 export default function Catalogo() {
@@ -87,6 +88,19 @@ export default function Catalogo() {
     return result;
   }, [products, selectedCategory, searchQuery, sortBy]);
 
+  const renderCategoryOptions = (parentId: number | null = null, level: number = 0): React.ReactNode[] => {
+    return categories
+      .filter((cat) => cat.parent_id === parentId)
+      .map((cat) => (
+        <React.Fragment key={cat.id}>
+          <option value={cat.id.toString()}>
+            {"\u00A0\u00A0".repeat(level)} {level > 0 ? "└ " : ""}{cat.name}
+          </option>
+          {renderCategoryOptions(cat.id, level + 1)}
+        </React.Fragment>
+      ));
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-[var(--color-brand-stone)] pt-28">
       
@@ -123,12 +137,10 @@ export default function Catalogo() {
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full sm:w-auto px-4 py-2 border border-stone-300 rounded-md text-sm focus:ring-[var(--color-brand-green)] focus:border-[var(--color-brand-green)]"
+              className="w-full sm:w-auto px-4 py-2 border border-stone-300 rounded-md text-sm focus:ring-[var(--color-brand-green)] focus:border-[var(--color-brand-green)] bg-white"
             >
               <option value="todos">Todas las categorías</option>
-              {categories.map((cat) => (
-                <option key={cat.id} value={cat.id.toString()}>{cat.name}</option>
-              ))}
+              {renderCategoryOptions(null, 0)}
             </select>
 
             {/* Ordenamiento */}
