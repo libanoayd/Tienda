@@ -23,6 +23,50 @@ export function CartSidebar() {
   const [shippingAddress, setShippingAddress] = useState("");
   const [isProcessingCheckout, setIsProcessingCheckout] = useState(false);
 
+  // Zipnova Shipping State
+  const [zipcode, setZipcode] = useState("");
+  const [shippingRates, setShippingRates] = useState<any[]>([]);
+  const [selectedShippingOption, setSelectedShippingOption] = useState<any | null>(null);
+  const [isQuoting, setIsQuoting] = useState(false);
+  const [quoteError, setQuoteError] = useState("");
+
+  const handleQuoteShipping = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!zipcode.trim()) return;
+    setIsQuoting(true);
+    setQuoteError("");
+    setShippingRates([]);
+    setSelectedShippingOption(null);
+
+    try {
+      const res = await fetch("/api/zipnova", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ destinationZip: zipcode.trim() })
+      });
+      const data = await res.json();
+      
+      if (data.error || !data.rates) {
+        setQuoteError("No se pudieron obtener opciones de envío para este CP.");
+      } else {
+        const validRates = data.rates
+          .filter((r: any) => r.amounts && r.amounts.price_incl_tax)
+          .sort((a: any, b: any) => a.amounts.price_incl_tax - b.amounts.price_incl_tax);
+        
+        if (validRates.length === 0) {
+          setQuoteError("No hay opciones de envío disponibles para este CP.");
+        } else {
+          setShippingRates(validRates);
+          setSelectedShippingOption(validRates[0]); // más barato por defecto
+        }
+      }
+    } catch (err) {
+      setQuoteError("Error de conexión al cotizar el envío.");
+    } finally {
+      setIsQuoting(false);
+    }
+  };
+
   const handleApplyCoupon = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!couponCode.trim()) return;
@@ -60,32 +104,29 @@ export function CartSidebar() {
   // Calcular descuento en dinero ($)
   const calculateDiscountAmount = () => {
     if (!appliedCoupon) return 0;
+    const { discount, targetType, categoryId, productId } = appliedCoupon;
+    
+    let applicableTotal = 0;
 
-    const subtotal = getCartTotal();
-
-    if (appliedCoupon.targetType === "all") {
-      return (subtotal * appliedCoupon.discount) / 100;
-    } else if (appliedCoupon.targetType === "category" && appliedCoupon.categoryId) {
-      // Aplicar porcentaje solo a los productos de esa categoría
-      const eligibleTotal = items
-        .filter((item: any) => item.category_id === appliedCoupon.categoryId)
-        .reduce((sum, item) => sum + item.price * item.quantity, 0);
-
-      return (eligibleTotal * appliedCoupon.discount) / 100;
-    } else if (appliedCoupon.targetType === "product" && appliedCoupon.productId) {
-      // Aplicar porcentaje solo a ese producto específico
-      const eligibleTotal = items
-        .filter((item: any) => item.id === appliedCoupon.productId)
-        .reduce((sum, item) => sum + item.price * item.quantity, 0);
-
-      return (eligibleTotal * appliedCoupon.discount) / 100;
+    if (targetType === "all") {
+      applicableTotal = getCartTotal();
+    } else if (targetType === "category" && categoryId) {
+      applicableTotal = items.reduce((total, item) => {
+        return item.category_id === categoryId ? total + (item.price * item.quantity) : total;
+      }, 0);
+    } else if (targetType === "product" && productId) {
+      applicableTotal = items.reduce((total, item) => {
+        return item.id === productId ? total + (item.price * item.quantity) : total;
+      }, 0);
     }
 
-    return 0;
+    return (applicableTotal * discount) / 100;
   };
 
+  const subtotal = getCartTotal();
   const discountAmount = calculateDiscountAmount();
-  const finalTotal = Math.max(0, getCartTotal() - discountAmount);
+  const shippingCost = deliveryMethod === 'envio' && selectedShippingOption ? selectedShippingOption.amounts.price_incl_tax : 0;
+  const finalTotal = subtotal - discountAmount + shippingCost;
 
   const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -107,7 +148,11 @@ export function CartSidebar() {
           },
           deliveryInfo: {
             method: deliveryMethod,
-            address: deliveryMethod === 'envio' ? shippingAddress : null
+            address: deliveryMethod === 'envio' ? shippingAddress : null,
+            zipcode: deliveryMethod === 'envio' ? zipcode : null,
+            carrier: deliveryMethod === 'envio' && selectedShippingOption ? selectedShippingOption.carrier.name : null,
+            service: deliveryMethod === 'envio' && selectedShippingOption ? selectedShippingOption.service_type.name : null,
+            cost: shippingCost
           }
         }),
       });
@@ -270,16 +315,63 @@ export function CartSidebar() {
 
               {/* Campo de Envío Condicional */}
               {deliveryMethod === 'envio' && (
-                <div className="pt-2 animate-in fade-in slide-in-from-top-2">
-                  <textarea 
-                    required 
-                    placeholder="Dirección completa y Código Postal. Ej: San Martín 123, CP 5500" 
-                    value={shippingAddress} 
-                    onChange={e => setShippingAddress(e.target.value)} 
-                    rows={2}
-                    className="w-full px-3 py-2 text-sm border border-stone-300 rounded-md focus:ring-[var(--color-brand-green)] focus:border-[var(--color-brand-green)]" 
-                  />
-                  <p className="text-[10px] text-stone-500 mt-1 leading-tight">Nos comunicaremos contigo por WhatsApp para coordinar el costo y horario de envío.</p>
+                <div className="pt-2 animate-in fade-in slide-in-from-top-2 space-y-3">
+                  
+                  <div className="flex space-x-2">
+                    <input 
+                      required 
+                      type="text"
+                      placeholder="Tu Código Postal (Ej: 1414)" 
+                      value={zipcode} 
+                      onChange={e => setZipcode(e.target.value)} 
+                      className="flex-1 px-3 py-2 text-sm border border-stone-300 rounded-md focus:ring-[var(--color-brand-green)] focus:border-[var(--color-brand-green)]" 
+                    />
+                    <button 
+                      type="button"
+                      onClick={handleQuoteShipping}
+                      disabled={isQuoting || !zipcode.trim()}
+                      className="px-4 py-2 bg-stone-900 text-white text-xs font-medium rounded-md hover:bg-stone-800 transition-colors disabled:opacity-50"
+                    >
+                      {isQuoting ? "..." : "Cotizar"}
+                    </button>
+                  </div>
+                  
+                  {quoteError && <p className="text-red-500 text-xs">{quoteError}</p>}
+                  
+                  {shippingRates.length > 0 && (
+                    <div className="space-y-2">
+                      <p className="text-xs font-bold text-stone-700">Opciones de Envío:</p>
+                      {shippingRates.map((rate, idx) => (
+                        <label key={idx} className={`flex items-center justify-between p-2 border rounded-md cursor-pointer ${selectedShippingOption === rate ? 'border-[var(--color-brand-green)] bg-green-50/30' : 'border-stone-200 bg-white'}`}>
+                          <div className="flex items-center space-x-2">
+                            <input 
+                              type="radio" 
+                              name="shippingRate" 
+                              checked={selectedShippingOption === rate}
+                              onChange={() => setSelectedShippingOption(rate)}
+                              className="text-[var(--color-brand-green)] focus:ring-[var(--color-brand-green)]" 
+                            />
+                            <div>
+                              <p className="text-sm font-medium text-stone-900">{rate.carrier.name}</p>
+                              <p className="text-xs text-stone-500">{rate.service_type.name}</p>
+                            </div>
+                          </div>
+                          <span className="text-sm font-bold text-stone-900">${rate.amounts.price_incl_tax.toLocaleString('es-AR')}</span>
+                        </label>
+                      ))}
+                    </div>
+                  )}
+
+                  {selectedShippingOption && (
+                    <textarea 
+                      required 
+                      placeholder="Dirección exacta (Calle, Número, Piso, Depto)" 
+                      value={shippingAddress} 
+                      onChange={e => setShippingAddress(e.target.value)} 
+                      rows={2}
+                      className="w-full px-3 py-2 text-sm border border-stone-300 rounded-md focus:ring-[var(--color-brand-green)] focus:border-[var(--color-brand-green)]" 
+                    />
+                  )}
                 </div>
               )}
 
