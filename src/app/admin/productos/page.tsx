@@ -20,6 +20,7 @@ interface Product {
 interface Category {
   id: number;
   name: string;
+  parent_id?: number | null;
 }
 
 export default function AdminProductos() {
@@ -174,6 +175,19 @@ export default function AdminProductos() {
     setImageUrl(product.image_url);
     setDescription(product.description || "");
     setShowModal(true);
+  };
+
+  const renderCategoryOptions = (parentId: number | null = null, level: number = 0): React.ReactNode[] => {
+    return categories
+      .filter((cat) => cat.parent_id === parentId)
+      .map((cat) => (
+        <React.Fragment key={cat.id}>
+          <option value={cat.id.toString()}>
+            {"\u00A0\u00A0".repeat(level)} {level > 0 ? "└ " : ""}{cat.name}
+          </option>
+          {renderCategoryOptions(cat.id, level + 1)}
+        </React.Fragment>
+      ));
   };
 
   const resetForm = () => {
@@ -358,9 +372,7 @@ export default function AdminProductos() {
                     className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-[var(--color-brand-green)] focus:outline-none bg-white text-sm"
                   >
                     <option value="">-- Seleccionar --</option>
-                    {categories.map((cat) => (
-                      <option key={cat.id} value={cat.id}>{cat.name}</option>
-                    ))}
+                    {renderCategoryOptions(null, 0)}
                   </select>
                 </div>
               </div>
