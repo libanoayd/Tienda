@@ -14,6 +14,7 @@ interface Product {
   image_url: string;
   category_id?: number;
   is_active?: boolean;
+  description?: string;
 }
 
 interface Category {
@@ -36,6 +37,7 @@ export default function AdminProductos() {
   const [stock, setStock] = useState("10");
   const [categoryId, setCategoryId] = useState("");
   const [imageUrl, setImageUrl] = useState("");
+  const [description, setDescription] = useState("");
 
   const fetchData = async () => {
     setLoading(true);
@@ -78,6 +80,7 @@ export default function AdminProductos() {
       stock: parseInt(stock) || 0,
       category_id: categoryId ? parseInt(categoryId) : null,
       image_url: finalImageUrl,
+      description: description || "",
     };
 
     if (editingProduct?.id) {
@@ -112,6 +115,7 @@ export default function AdminProductos() {
     setStock(product.stock !== undefined ? product.stock.toString() : "10");
     setCategoryId(product.category_id ? product.category_id.toString() : "");
     setImageUrl(product.image_url);
+    setDescription(product.description || "");
     setShowModal(true);
   };
 
@@ -124,6 +128,7 @@ export default function AdminProductos() {
     setStock("10");
     setCategoryId("");
     setImageUrl("");
+    setDescription("");
   };
 
   return (
@@ -301,6 +306,16 @@ export default function AdminProductos() {
                     ))}
                   </select>
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-stone-700 mb-1">Descripción del Producto</label>
+                <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Detalles adicionales, aromas, propiedades..."
+                  className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-[var(--color-brand-green)] focus:outline-none min-h-[80px] resize-y text-sm"
+                />
               </div>
 
               <div>

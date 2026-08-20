@@ -26,6 +26,7 @@ export default function ProductoDetail({ params }: { params: Promise<{ id: strin
           price: data.price,
           image: data.image_url || "/productos/yagra.png",
           stock: data.stock !== undefined ? data.stock : 10,
+          description: data.description,
         });
       } else {
         // Fallback a los datos mockeados si no existe en Supabase aún
@@ -97,8 +98,8 @@ export default function ProductoDetail({ params }: { params: Promise<{ id: strin
               ${product.price.toLocaleString("es-AR")}
             </p>
 
-            <p className="text-stone-600 mb-8 leading-relaxed">
-              Diseñado para transformar el ambiente de tu hogar. Elaborado con materias primas de la más alta calidad para garantizar una experiencia aromática prolongada y equilibrada.
+            <p className="text-stone-600 mb-8 leading-relaxed whitespace-pre-line">
+              {product.description || "Diseñado para transformar el ambiente de tu hogar. Elaborado con materias primas de la más alta calidad para garantizar una experiencia aromática prolongada y equilibrada."}
             </p>
 
             {/* Botón Agregar al Carrito */}
