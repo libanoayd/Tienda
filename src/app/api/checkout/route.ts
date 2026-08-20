@@ -72,7 +72,10 @@ export async function POST(request: Request) {
       currency_id: "ARS",
     }));
 
-    const origin = request.headers.get("origin") || "https://libanoayd.vercel.app";
+    let origin = request.headers.get("origin");
+    if (!origin || origin === "null") {
+      origin = "http://localhost:3000"; // fallback for local dev if origin header is missing
+    }
 
     // Creamos la preferencia de pago
     const preference = new Preference(client);
