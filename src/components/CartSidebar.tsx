@@ -184,7 +184,7 @@ export function CartSidebar() {
   return (
     <>
       <div className="fixed inset-0 bg-black/50 z-50 transition-opacity" onClick={toggleCart} />
-      <div className="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-white shadow-xl flex flex-col transform transition-transform duration-300">
+      <div className="fixed inset-y-0 right-0 z-50 w-full max-w-[500px] bg-white shadow-xl flex flex-col transform transition-transform duration-300">
         
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-stone-200">
@@ -345,7 +345,8 @@ export function CartSidebar() {
                   {shippingRates.length > 0 && (
                     <div className="space-y-2">
                       <p className="text-xs font-bold text-stone-700">Opciones de Envío:</p>
-                      {shippingRates.map((rate, idx) => (
+                      <div className="space-y-2 max-h-40 overflow-y-auto pr-1 stylish-scroll">
+                        {shippingRates.map((rate, idx) => (
                         <label key={idx} className={`flex items-center justify-between p-2 border rounded-md cursor-pointer ${selectedShippingOption === rate ? 'border-[var(--color-brand-green)] bg-green-50/30' : 'border-stone-200 bg-white'}`}>
                           <div className="flex items-center space-x-2">
                             <input 
@@ -356,13 +357,14 @@ export function CartSidebar() {
                               className="text-[var(--color-brand-green)] focus:ring-[var(--color-brand-green)]" 
                             />
                             <div>
-                              <p className="text-sm font-medium text-stone-900">{rate.carrier.name}</p>
-                              <p className="text-xs text-stone-500">{rate.service_type.name}</p>
+                              <p className="text-sm font-semibold text-stone-900 leading-none">{rate.carrier.name}</p>
+                              <p className="text-[10px] text-stone-500 mt-0.5">{rate.service_type.name}</p>
                             </div>
                           </div>
                           <span className="text-sm font-bold text-stone-900">${rate.amounts.price_incl_tax.toLocaleString('es-AR')}</span>
                         </label>
-                      ))}
+                        ))}
+                      </div>
                     </div>
                   )}
 
