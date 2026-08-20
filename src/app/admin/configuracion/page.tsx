@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { Save, Clock, Star, MapPin, CheckCircle } from "lucide-react";
+import { Save, Clock, Star, MapPin, CheckCircle, X } from "lucide-react";
 
 export default function AdminConfiguracion() {
   const [schedule, setSchedule] = useState("Lunes a Sábados: 09:00 a 20:00 hs");
@@ -69,18 +69,76 @@ export default function AdminConfiguracion() {
         
         {/* Horarios */}
         <div>
-          <label className="block font-medium text-stone-900 mb-2 flex items-center">
+          <label className="block font-medium text-stone-900 mb-4 flex items-center">
             <Clock className="h-5 w-5 mr-2 text-[var(--color-brand-green)]" /> Horarios de Atención
           </label>
-          <textarea
-            value={schedule}
-            onChange={(e) => setSchedule(e.target.value)}
-            placeholder="Ej: Lunes a Viernes: 09:00 a 13:00 hs y 16:30 a 18:30 hs&#10;Sábados: 10:00 a 13:30 hs"
-            rows={3}
-            className="w-full px-4 py-3 border border-stone-300 rounded-lg focus:ring-2 focus:ring-[var(--color-brand-green)] focus:outline-none"
-            required
-          />
-          <p className="text-xs text-stone-500 mt-1">Puedes escribir varias líneas (presionando Enter). Este texto aparecerá en la sección de contacto del local.</p>
+          
+          <div className="space-y-3 bg-stone-50 p-4 rounded-xl border border-stone-200">
+            {schedule.split('\n').map((line, index) => {
+              const [daysPart, ...hoursPart] = line.split(':');
+              const days = daysPart || '';
+              const hours = hoursPart.join(':').trim() || '';
+
+              return (
+                <div key={index} className="flex flex-col sm:flex-row gap-3 items-center bg-white p-3 rounded-lg border border-stone-200 shadow-sm">
+                  <div className="w-full sm:w-1/3">
+                    <label className="block text-xs font-semibold text-stone-500 uppercase mb-1">Días</label>
+                    <input 
+                      type="text" 
+                      value={days}
+                      onChange={(e) => {
+                        const newLines = schedule.split('\n');
+                        newLines[index] = `${e.target.value}: ${hours}`;
+                        setSchedule(newLines.join('\n'));
+                      }}
+                      placeholder="Ej: Lunes a Viernes"
+                      className="w-full px-3 py-2 text-sm border border-stone-300 rounded-md focus:ring-2 focus:ring-[var(--color-brand-green)]"
+                    />
+                  </div>
+                  <div className="w-full sm:flex-1">
+                    <label className="block text-xs font-semibold text-stone-500 uppercase mb-1">Horario</label>
+                    <input 
+                      type="text" 
+                      value={hours}
+                      onChange={(e) => {
+                        const newLines = schedule.split('\n');
+                        newLines[index] = `${days}: ${e.target.value}`;
+                        setSchedule(newLines.join('\n'));
+                      }}
+                      placeholder="Ej: 09:00 a 13:00 hs y 16:30 a 18:30 hs"
+                      className="w-full px-3 py-2 text-sm border border-stone-300 rounded-md focus:ring-2 focus:ring-[var(--color-brand-green)]"
+                    />
+                  </div>
+                  <div className="pt-5">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newLines = schedule.split('\n');
+                        newLines.splice(index, 1);
+                        setSchedule(newLines.join('\n'));
+                      }}
+                      className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                      title="Eliminar fila"
+                    >
+                      <X className="h-5 w-5" />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+
+            <button
+              type="button"
+              onClick={() => {
+                const newLines = schedule ? schedule.split('\n') : [];
+                newLines.push("Nuevos Días: 00:00 a 00:00");
+                setSchedule(newLines.join('\n'));
+              }}
+              className="mt-2 text-sm font-medium text-[var(--color-brand-green)] hover:text-[var(--color-brand-dark)] flex items-center bg-white px-4 py-2 rounded-lg border border-stone-200 shadow-sm transition-colors"
+            >
+              + Agregar otro día/horario
+            </button>
+          </div>
         </div>
 
         {/* Puntuación de Google */}
