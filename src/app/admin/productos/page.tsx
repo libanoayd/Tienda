@@ -66,7 +66,8 @@ export default function AdminProductos() {
     let finalImageUrl = imageUrl || "/productos/yagra.png";
     const driveMatch = finalImageUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
     if (driveMatch) {
-      finalImageUrl = `https://drive.google.com/uc?export=view&id=${driveMatch[1]}`;
+      // Usar el endpoint de thumbnails de Google Drive (el único que funciona actualmente para img tags)
+      finalImageUrl = `https://drive.google.com/thumbnail?id=${driveMatch[1]}&sz=w800`;
     }
 
     const productData = {
