@@ -7,16 +7,31 @@ import { Lock, ArrowRight } from "lucide-react";
 export default function AdminLogin() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Contraseña establecida por el usuario
-    if (password === "32840802") {
-      localStorage.setItem("libano_admin_auth", "true");
-      router.push("/admin");
-    } else {
+    setLoading(true);
+    
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password })
+      });
+      
+      if (res.ok) {
+        // La API ya configuró la cookie segura HttpOnly
+        router.push("/admin");
+        router.refresh(); // Para asegurar que el layout se vuelva a renderizar
+      } else {
+        setError(true);
+      }
+    } catch (err) {
       setError(true);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -56,9 +71,10 @@ export default function AdminLogin() {
 
           <button
             type="submit"
-            className="w-full flex items-center justify-center px-6 py-3 bg-[var(--color-brand-green)] text-white font-medium rounded-lg hover:bg-[var(--color-brand-dark)] transition-colors uppercase tracking-wider text-sm shadow-md"
+            disabled={loading}
+            className="w-full flex items-center justify-center px-6 py-3 bg-[var(--color-brand-green)] text-white font-medium rounded-lg hover:bg-[var(--color-brand-dark)] transition-colors uppercase tracking-wider text-sm shadow-md disabled:opacity-70"
           >
-            Ingresar al Panel
+            {loading ? "Verificando..." : "Acceder al Panel"}
             <ArrowRight className="ml-2 h-4 w-4" />
           </button>
         </form>

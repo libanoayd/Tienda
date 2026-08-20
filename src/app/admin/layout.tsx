@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { LayoutDashboard, Package, Tag, Settings, LogOut, FolderPlus, ShoppingCart } from "lucide-react";
@@ -12,37 +11,16 @@ export default function AdminLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
-  useEffect(() => {
-    // Si estamos en la pantalla de login, no verificamos autenticación
-    if (pathname === "/admin/login") {
-      setIsAuthenticated(true);
-      return;
-    }
-
-    const auth = localStorage.getItem("libano_admin_auth");
-    if (auth === "true") {
-      setIsAuthenticated(true);
-    } else {
-      setIsAuthenticated(false);
-      router.push("/admin/login");
-    }
-  }, [pathname, router]);
-
-  const handleLogout = () => {
-    localStorage.removeItem("libano_admin_auth");
+  const handleLogout = async () => {
+    await fetch("/api/auth/logout", { method: "POST" });
     router.push("/admin/login");
+    router.refresh();
   };
 
-  // Si estamos en la página de login, mostramos solo el contenido de login
+  // Si estamos en la página de login, mostramos solo el contenido de login sin el sidebar
   if (pathname === "/admin/login") {
     return <>{children}</>;
-  }
-
-  // Mientras verifica autenticación, mostramos pantalla limpia
-  if (isAuthenticated === null || !isAuthenticated) {
-    return <div className="min-h-screen bg-stone-100 flex items-center justify-center text-stone-500">Verificando acceso...</div>;
   }
 
   return (
