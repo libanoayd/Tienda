@@ -59,7 +59,7 @@ export default function PagoExitoso() {
         )}
         
         <p className="text-stone-600 mb-8 leading-relaxed">
-          Tu pago ha sido procesado correctamente. Recibirás un correo electrónico de Mercado Pago con los detalles de la transacción. ¡Gracias por confiar en Líbano Aromas!
+          Tu pago ha sido procesado correctamente. Te hemos enviado un recibo a tu correo con todos los detalles de lo que compraste, el monto y las instrucciones para la entrega. ¡Gracias por confiar en Líbano Aromas!
         </p>
 
         <div className="space-y-4">

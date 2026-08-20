@@ -62,6 +62,13 @@ export default function AdminProductos() {
     e.preventDefault();
     if (!name || !price) return alert("Por favor completa el nombre y precio.");
 
+    // Convertir enlace de Google Drive a enlace directo si es necesario
+    let finalImageUrl = imageUrl || "/productos/yagra.png";
+    const driveMatch = finalImageUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+    if (driveMatch) {
+      finalImageUrl = `https://drive.google.com/uc?export=view&id=${driveMatch[1]}`;
+    }
+
     const productData = {
       name,
       brand: brand || "Líbano",
@@ -69,7 +76,7 @@ export default function AdminProductos() {
       price: parseFloat(price),
       stock: parseInt(stock) || 0,
       category_id: categoryId ? parseInt(categoryId) : null,
-      image_url: imageUrl || "/productos/yagra.png",
+      image_url: finalImageUrl,
     };
 
     if (editingProduct?.id) {

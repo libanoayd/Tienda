@@ -39,6 +39,7 @@ export async function POST(request: Request) {
     const mailOptions = {
       from: `"Líbano Aromas y Decoración" <${process.env.GMAIL_USER}>`,
       to: order.user_email,
+      bcc: process.env.GMAIL_USER, // Copia oculta para el dueño de la tienda
       subject: `¡Confirmación de tu pedido #${order.id} en Líbano!`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #133C37;">
