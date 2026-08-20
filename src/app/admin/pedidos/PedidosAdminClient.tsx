@@ -47,6 +47,7 @@ export default function PedidosAdminClient() {
           product:products(image_url)
         )
       `)
+      .neq("status", "pending")
       .order("created_at", { ascending: false });
 
     if (!error && ordersData) {
