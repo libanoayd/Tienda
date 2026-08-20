@@ -1,8 +1,8 @@
 # Líbano | Aromas y Decoración - E-commerce
 
-Este es el repositorio oficial del e-commerce para **Líbano Aromas y Decoración**. Construido con tecnologías modernas para asegurar velocidad, SEO y una excelente experiencia de usuario.
+Este es el repositorio oficial del e-commerce para **Líbano Aromas y Decoración**. Construido con tecnologías modernas para asegurar velocidad, SEO, escalabilidad y una excelente experiencia de usuario.
 
-## 🛠 Tecnologías Utilizadas
+## 🚀 Tecnologías Utilizadas
 * **Framework:** Next.js 14 (App Router)
 * **Estilos:** Tailwind CSS
 * **Estado Global (Carrito):** Zustand
@@ -11,43 +11,46 @@ Este es el repositorio oficial del e-commerce para **Líbano Aromas y Decoració
 * **Iconos:** Lucide React
 * **Hosting:** Vercel
 
-## 🚀 Actualizaciones y Progreso (Changelog)
+## 📦 Características Implementadas
 
-### Fase 1: Estructura Base y Diseño
-- [x] Instalación de Next.js y Tailwind CSS.
-- [x] Configuración de Paleta de Colores oficial (`globals.css`) extraída del manual de marca SVG.
-  - Verde Cerceta (`#207473`), Verde Bosque (`#133C37`), Dorado (`#E2B370`), Terracota (`#E65B3A`).
-- [x] Incorporación del logo transparente oficial (SVG / PNG).
+### Interfaz Pública y Ventas
+- **Portada Dinámica:** Se conecta a Supabase para mostrar en tiempo real los últimos 4 productos agregados al inventario.
+- **Catálogo Inteligente:** Filtros por categoría y subcategorías jerárquicas.
+- **Carrito de Compras (Zustand):** Sidebar lateral para gestionar cantidades, aplicar cupones de descuento y visualizar totales sin recargar la página.
+- **Páginas Informativas:** Sección "Nosotros" detallando la filosofía de la marca e información de Contacto/Ubicación interactiva.
+- **Botón de WhatsApp:** Integrado para consultas rápidas.
 
-### Fase 2: Navegación y UI
-- [x] Barra de navegación (`Navbar.tsx`) adaptativa: transparente con sombra sobre la portada y fondo blanco sólido con tipografía verde bosque (`#133C37`) en páginas internas (Catálogo, Contacto). Oculta en `/admin`.
-- [x] Integración de reputación oficial de Google Business: **4.3 ★★★★★ (164 opiniones)** y ubicación exacta en **Suipacha 422, Mendoza**.
-- [x] Botón flotante de WhatsApp configurado con el número oficial (`+5492612526299`).
-- [x] Portada (Hero) dinámica con fotografía de alta calidad que representa el nicho del negocio.
+### 💳 Checkout y Pagos (Mercado Pago)
+- **Integración de Preferencias MP:** Cálculo exacto de precios y descuentos enviados a la pasarela con `auto_return` dinámico basado en el entorno de ejecución (Vercel).
+- **Manejo de Errores Detallado:** Captura de fallos de la API de Mercado Pago para notificar al cliente el motivo exacto del rechazo.
+- **Páginas de Retorno Automático:**
+  - `pago-exitoso`: Vacía el carrito automáticamente y le otorga un "Número de Orden" claro al cliente.
+  - `pago-pendiente`: Para pagos en efectivo (RapiPago / PagoFácil).
+  - `pago-fallido`: Permite volver a intentar el pago.
+- **Opciones de Entrega:** El cliente puede seleccionar en el carrito entre **Retiro en Local (Gratis)** o **Envío a Domicilio (A coordinar)**.
 
-### Fase 3: Catálogo y Carrito de Compras
-- [x] Creación de `ProductCard.tsx` con efecto hover y botón de "Añadir rápido".
-- [x] Implementación de **Zustand** (`store/cartStore.ts`) para manejar el estado del carrito sin recargar la página.
-- [x] Barra lateral deslizable (Sidebar) para el carrito de compras.
-- [x] Creación de la página oficial de Catálogo (`/catalogo`) con filtros dinámicos por sección y búsqueda.
+### ⚙️ Panel de Administrador (`/admin`)
+- **Dashboard Estadístico:** Métricas en tiempo real conectadas a Supabase.
+- **Gestión de Pedidos:** 
+  - Visualización de compras con fotos miniatura de cada artículo de la orden.
+  - Identificación del método de entrega (Retiro / Envío).
+  - Resaltado de la dirección de envío del cliente.
+  - Generación de Número de Orden atado a Mercado Pago.
+- **Inventario y Productos:** ABM (Alta, Baja, Modificación) conectado a Supabase con control de stock real.
+- **Gestión de Categorías:** Soporte para Subcategorías (jerarquías `parent_id` en Supabase).
+- **Configuración de Tienda:** Permite cambiar fácilmente (en múltiples líneas) el horario de atención de la tienda física (ej. Lunes a Viernes de 09:00 a 13:00 y de 16:30 a 18:30).
 
-### Fase 4: Pagos (Checkout)
-- [x] Integración del SDK de **Mercado Pago** en el backend.
-- [x] Creación del endpoint `/api/checkout` que genera la Preferencia de Pago en base a los ítems del carrito y devuelve el link de redirección.
+## 🛠️ Configuración Inicial
+Si vas a clonar el repositorio, asegúrate de configurar las siguientes variables en un archivo `.env.local` y en Vercel:
 
-### Fase 5: Panel de Administración (Gestión Interactiva & Variaciones)
-- [x] Maquetado del panel de control privado (`/admin`) protegido por contraseña (`32840802`).
-- [x] Módulo de **Gestión de Productos** (`/admin/productos`) con soporte para variaciones de **Marcas** (*Sagrada Madre, Just, Tera India*) y **Presentación** (*Caja x 8 varillas, 10ml, etc.*).
-- [x] Módulo de **Cupones de Descuento** (`/admin/cupones`).
-- [x] Esquema de Base de Datos completo en `database_schema.sql`.
+```env
+NEXT_PUBLIC_SUPABASE_URL=tu_url_de_supabase
+NEXT_PUBLIC_SUPABASE_ANON_KEY=tu_anon_key_de_supabase
+MP_ACCESS_TOKEN=tu_access_token_de_mercado_pago
+```
 
-## 📸 Guía: ¿Dónde almacenar las fotos de los productos?
-Para almacenar y subir las fotos de tus productos:
-1. **Opción A (Archivos locales en la carpeta `public`):**
-   Puedes guardar las imágenes de tus productos dentro de la carpeta `public/productos/` del proyecto. Al ingresar en el panel de control, la URL será `/productos/nombre-de-foto.png`.
-2. **Opción B (Supabase Storage / Cloudflare R2):**
-   Dentro de tu panel de Supabase o Cloudflare R2, subes la foto del producto y usas la URL pública directa que te proporciona el sistema.
+El esquema completo de la base de datos se encuentra en `database_schema.sql` (Ejecutar en el SQL Editor de Supabase).
 
-## ⚙️ Pasos Siguientes
-1. Correr el nuevo código de `database_schema.sql` en el SQL Editor de Supabase.
-2. Cargar los productos reales con sus marcas y presentaciones desde `/admin/productos`.
+## 📷 ¿Dónde almacenar las fotos de los productos?
+1. **Opción A (Archivos locales):** Puedes guardar imágenes dentro de `public/productos/`. La URL a registrar en el panel será `/productos/nombre.jpg`.
+2. **Opción B (Recomendada - Supabase Storage):** Sube la foto a un Bucket (ej. `products-images`) en Supabase y pega la URL pública generada directamente en la ficha del producto en el panel de administrador.
