@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { CheckCircle, ArrowRight } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
 
@@ -10,10 +11,8 @@ export default function PagoExitoso() {
   const [orderId, setOrderId] = useState<string | null>(null);
 
   useEffect(() => {
-    // Limpiamos el carrito porque la compra ya se realizó
     clearCart();
     
-    // Obtener número de orden de la URL (MercadoPago envía external_reference)
     const searchParams = new URLSearchParams(window.location.search);
     const externalRef = searchParams.get("external_reference");
     if (externalRef) {
@@ -22,9 +21,20 @@ export default function PagoExitoso() {
   }, [clearCart]);
 
   return (
-    <div className="min-h-screen bg-[var(--color-brand-stone)] flex items-center justify-center pt-20 pb-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-sm border border-stone-200 text-center">
-        <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-6">
+    <div className="relative min-h-screen flex items-center justify-center pt-20 pb-12 px-4 sm:px-6 lg:px-8">
+      {/* Fondo elegante */}
+      <div className="absolute inset-0 z-0">
+        <Image 
+          src="/hero-libano.jpg" 
+          alt="Fondo Líbano" 
+          fill 
+          className="object-cover"
+        />
+        <div className="absolute inset-0 bg-stone-900/70 backdrop-blur-[2px]" />
+      </div>
+
+      <div className="relative z-10 max-w-md w-full bg-white/95 backdrop-blur-md p-8 rounded-2xl shadow-2xl border border-white/20 text-center">
+        <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-6 shadow-inner">
           <CheckCircle className="h-10 w-10 text-green-600" />
         </div>
         
