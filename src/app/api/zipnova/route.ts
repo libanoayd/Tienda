@@ -10,8 +10,8 @@ export async function POST(request: Request) {
 
     const accountId = "21697";
     const originId = "380239";
-    const zipnovaKey = "2163c81c-a8a1-4f31-b678-98d1325234c2";
-    const zipnovaSecret = "44bf2d1a-67cc-4447-83dc-2352fcc59abc";
+    const zipnovaKey = "2163e81c-a8a1-4f31-b678-98d1325234e2";
+    const zipnovaSecret = "44bf2d1a-67ee-4447-83dc-2352fce59abc";
 
     // Basic Auth
     const authHeader = "Basic " + Buffer.from(`${zipnovaKey}:${zipnovaSecret}`).toString('base64');
@@ -19,15 +19,19 @@ export async function POST(request: Request) {
     const payload = {
       account_id: parseInt(accountId),
       origin_id: parseInt(originId),
+      declared_value: 10000, // placeholder
       destination: {
-        zip_code: destinationZip
+        zipcode: destinationZip,
+        city: "Ciudad", // placeholder needed for quote
+        state: "Provincia" // placeholder needed for quote
       },
       packages: [
         {
-          weight: 1, // 1 kg
-          width: 20, // 20 cm
-          height: 20, // 20 cm
-          depth: 20  // 20 cm
+          weight: 1000, // 1000 grams = 1kg
+          width: 20, 
+          height: 20, 
+          length: 20,
+          classification_id: 1 // 1=caja
         }
       ]
     };
