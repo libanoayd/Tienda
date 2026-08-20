@@ -11,7 +11,7 @@ export function CartSidebar() {
 
   // Coupon State
   const [couponCode, setCouponCode] = useState("");
-  const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discount: number; targetType: string; categoryId?: number | null } | null>(null);
+  const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discount: number; targetType: string; categoryId?: number | null; productId?: number | null } | null>(null);
   const [couponError, setCouponError] = useState("");
   const [applying, setApplying] = useState(false);
 
@@ -49,6 +49,7 @@ export function CartSidebar() {
         discount: data.discount_percentage,
         targetType: data.target_type || "all",
         categoryId: data.category_id,
+        productId: data.product_id,
       });
       setCouponError("");
     }
@@ -68,6 +69,13 @@ export function CartSidebar() {
       // Aplicar porcentaje solo a los productos de esa categoría
       const eligibleTotal = items
         .filter((item: any) => item.category_id === appliedCoupon.categoryId)
+        .reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+      return (eligibleTotal * appliedCoupon.discount) / 100;
+    } else if (appliedCoupon.targetType === "product" && appliedCoupon.productId) {
+      // Aplicar porcentaje solo a ese producto específico
+      const eligibleTotal = items
+        .filter((item: any) => item.id === appliedCoupon.productId)
         .reduce((sum, item) => sum + item.price * item.quantity, 0);
 
       return (eligibleTotal * appliedCoupon.discount) / 100;

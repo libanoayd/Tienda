@@ -10,6 +10,7 @@ interface Coupon {
   discount_percentage: number;
   target_type: string;
   category_id?: number | null;
+  product_id?: number | null;
   is_active: boolean;
 }
 
@@ -18,9 +19,15 @@ interface Category {
   name: string;
 }
 
+interface Product {
+  id: number;
+  name: string;
+}
+
 export default function AdminCupones() {
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
 
@@ -29,12 +36,16 @@ export default function AdminCupones() {
   const [discount, setDiscount] = useState("");
   const [targetType, setTargetType] = useState("all");
   const [categoryId, setCategoryId] = useState("");
+  const [productId, setProductId] = useState("");
 
   const fetchData = async () => {
     setLoading(true);
 
     const { data: catData } = await supabase.from("categories").select("*");
     if (catData) setCategories(catData);
+
+    const { data: prodData } = await supabase.from("products").select("id, name");
+    if (prodData) setProducts(prodData);
 
     const { data, error } = await supabase.from("coupons").select("*").order("id", { ascending: false });
     if (error) {
@@ -59,6 +70,7 @@ export default function AdminCupones() {
         discount_percentage: parseInt(discount),
         target_type: targetType,
         category_id: targetType === "category" && categoryId ? parseInt(categoryId) : null,
+        product_id: targetType === "product" && productId ? parseInt(productId) : null,
         is_active: true,
       },
     ]);
@@ -87,12 +99,20 @@ export default function AdminCupones() {
     setDiscount("");
     setTargetType("all");
     setCategoryId("");
+    setProductId("");
   };
 
-  const getCategoryName = (catId?: number | null) => {
-    if (!catId) return "Todo el sitio";
-    const found = categories.find((c) => c.id === catId);
-    return found ? found.name : "Categoría específica";
+  const getTargetName = (coupon: Coupon) => {
+    if (coupon.target_type === "all") return "Todo el sitio";
+    if (coupon.target_type === "category") {
+      const found = categories.find((c) => c.id === coupon.category_id);
+      return found ? `Categoría: ${found.name}` : "Categoría específica";
+    }
+    if (coupon.target_type === "product") {
+      const found = products.find((p) => p.id === coupon.product_id);
+      return found ? `Producto: ${found.name}` : "Producto específico";
+    }
+    return "Específico";
   };
 
   return (
@@ -145,7 +165,7 @@ export default function AdminCupones() {
                   <td className="py-4 px-6 text-stone-600">
                     <span className="inline-flex items-center text-xs font-medium bg-stone-100 text-stone-800 px-2.5 py-1 rounded-full border border-stone-200">
                       <Layers className="h-3 w-3 mr-1 text-stone-500" />
-                      {coupon.target_type === "category" ? getCategoryName(coupon.category_id) : "🌐 Todo el Sitio"}
+                      {getTargetName(coupon)}
                     </span>
                   </td>
                   <td className="py-4 px-6">
@@ -217,6 +237,7 @@ export default function AdminCupones() {
                 >
                   <option value="all">🌐 Todo el sitio (Todos los productos)</option>
                   <option value="category">🏷️ Solo a una Sección / Categoría específica</option>
+                  <option value="product">🎁 Solo a un Producto específico</option>
                 </select>
               </div>
 
@@ -229,9 +250,26 @@ export default function AdminCupones() {
                     className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-[var(--color-brand-green)] focus:outline-none bg-white"
                     required
                   >
-                    <option value="">-- Elige una sección --</option>
+                    <option value="">-- Elige una --</option>
                     {categories.map((cat) => (
                       <option key={cat.id} value={cat.id}>{cat.name}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {targetType === "product" && (
+                <div>
+                  <label className="block text-sm font-medium text-stone-700 mb-1">Selecciona el Producto</label>
+                  <select
+                    value={productId}
+                    onChange={(e) => setProductId(e.target.value)}
+                    className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-[var(--color-brand-green)] focus:outline-none bg-white"
+                    required
+                  >
+                    <option value="">-- Elige uno --</option>
+                    {products.map((p) => (
+                      <option key={p.id} value={p.id}>{p.name}</option>
                     ))}
                   </select>
                 </div>
