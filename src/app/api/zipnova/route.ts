@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
   try {
-    const { destinationZip } = await request.json();
+    const { destinationZip, cartTotal } = await request.json();
 
     if (!destinationZip) {
       return NextResponse.json({ error: "Falta código postal" }, { status: 400 });
@@ -19,7 +19,7 @@ export async function POST(request: Request) {
     const payload = {
       account_id: parseInt(accountId),
       origin_id: parseInt(originId),
-      declared_value: 10000, // placeholder
+      declared_value: cartTotal || 10000,
       destination: {
         zipcode: destinationZip,
         city: "Ciudad", // placeholder needed for quote

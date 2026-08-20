@@ -42,14 +42,18 @@ export function CartSidebar() {
       const res = await fetch("/api/zipnova", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ destinationZip: zipcode.trim() })
+        body: JSON.stringify({ 
+          destinationZip: zipcode.trim(),
+          cartTotal: getCartTotal()
+        })
       });
       const data = await res.json();
       
-      if (data.error || !data.rates) {
+      if (data.error || (!data.rates && !data.all_results)) {
         setQuoteError("No se pudieron obtener opciones de envío para este CP.");
       } else {
-        const validRates = data.rates
+        const ratesArray = data.all_results || data.rates || [];
+        const validRates = ratesArray
           .filter((r: any) => r.amounts && r.amounts.price_incl_tax)
           .sort((a: any, b: any) => a.amounts.price_incl_tax - b.amounts.price_incl_tax);
         
