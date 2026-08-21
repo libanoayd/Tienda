@@ -40,9 +40,9 @@ export default function NosotrosPage() {
             <div className="mx-auto h-16 w-16 bg-stone-50 rounded-full flex items-center justify-center mb-6">
               <Leaf className="h-8 w-8 text-[var(--color-brand-green)]" />
             </div>
-            <h3 className="text-xl font-serif text-stone-900 mb-4">Insumos Cuidados</h3>
+            <h3 className="text-xl font-serif text-stone-900 mb-4">Selección Rigurosa</h3>
             <p className="text-stone-600 leading-relaxed">
-              Trabajamos con ceras y esencias seleccionadas rigurosamente, priorizando opciones respetuosas con el medio ambiente y la salud de tu hogar.
+              Elegimos cuidadosamente cada producto de nuestro catálogo, incluyendo sahumerios y aromas de calidad premium, muchas veces importados directamente desde la India.
             </p>
           </div>
 
@@ -51,9 +51,9 @@ export default function NosotrosPage() {
             <div className="mx-auto h-16 w-16 bg-stone-50 rounded-full flex items-center justify-center mb-6">
               <Heart className="h-8 w-8 text-[var(--color-brand-terra)]" />
             </div>
-            <h3 className="text-xl font-serif text-stone-900 mb-4">Trabajo Artesanal</h3>
+            <h3 className="text-xl font-serif text-stone-900 mb-4">Experiencia Sensorial</h3>
             <p className="text-stone-600 leading-relaxed">
-              Cada vela y difusor es vertido a mano con amor y dedicación. No somos una fábrica, somos un taller donde cada detalle importa.
+              Creemos que cada espacio cuenta una historia. No somos solo una tienda, somos tus aliados para encontrar la fragancia y el detalle perfecto que te represente.
             </p>
           </div>
 
@@ -62,9 +62,9 @@ export default function NosotrosPage() {
             <div className="mx-auto h-16 w-16 bg-stone-50 rounded-full flex items-center justify-center mb-6">
               <Sparkles className="h-8 w-8 text-amber-500" />
             </div>
-            <h3 className="text-xl font-serif text-stone-900 mb-4">Diseño Atemporal</h3>
+            <h3 className="text-xl font-serif text-stone-900 mb-4">Estética y Armonía</h3>
             <p className="text-stone-600 leading-relaxed">
-              Nuestros envases y presentaciones están pensados para integrarse armoniosamente en cualquier estilo de decoración.
+              Buscamos que cada elemento que ofrecemos no solo perfume tus ambientes, sino que aporte belleza visual, integrándose en cualquier estilo de decoración.
             </p>
           </div>
         </div>

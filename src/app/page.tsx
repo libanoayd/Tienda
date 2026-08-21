@@ -43,7 +43,7 @@ export default async function Home() {
             Líbano Aromas y Decoración
           </h1>
           <p className="text-xl text-stone-100 mb-10 font-light drop-shadow-md">
-            Insumos de decoración y sahumerios artesanales para crear ambientes de paz.
+            Aromas de primera calidad y objetos de decoración seleccionados para crear ambientes de paz.
           </p>
           <Link 
             href="/catalogo" 
