@@ -5,8 +5,10 @@ import { useCartStore } from "@/store/cartStore";
 import { X, Minus, Plus, ShoppingBag, Tag, CheckCircle } from "lucide-react";
 import Image from "next/image";
 import { supabase } from "@/lib/supabase";
+import { useRouter } from "next/navigation";
 
 export function CartSidebar() {
+  const router = useRouter();
   const { items, isOpen, toggleCart, updateQuantity, removeFromCart, getCartTotal } = useCartStore();
 
   if (!isOpen) return null;
@@ -81,7 +83,7 @@ export function CartSidebar() {
             <button
               onClick={() => {
                 toggleCart();
-                window.location.href = "/checkout";
+                router.push("/checkout");
               }}
               className="w-full flex items-center justify-center px-6 py-4 bg-[var(--color-brand-green)] text-white font-medium hover:bg-[var(--color-brand-dark)] transition-colors uppercase tracking-wider text-sm shadow-md rounded-lg"
             >

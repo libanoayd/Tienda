@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
 export interface Product {
   id: number;
@@ -26,9 +27,11 @@ interface CartState {
   clearCart: () => void;
 }
 
-export const useCartStore = create<CartState>((set, get) => ({
-  items: [],
-  isOpen: false,
+export const useCartStore = create<CartState>()(
+  persist(
+    (set, get) => ({
+      items: [],
+      isOpen: false,
   addToCart: (product) => {
     set((state) => {
       if (product.stock <= 0) return state; // No agregar si no hay stock
@@ -74,4 +77,10 @@ export const useCartStore = create<CartState>((set, get) => ({
     return items.reduce((count, item) => count + item.quantity, 0);
   },
   clearCart: () => set({ items: [] }),
-}));
+    }),
+    {
+      name: 'tienda-libano-cart',
+      partialize: (state) => ({ items: state.items }), // Solo guardar los items
+    }
+  )
+);
