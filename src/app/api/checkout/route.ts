@@ -10,7 +10,7 @@ const client = new MercadoPagoConfig({
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { items, total, userInfo, deliveryInfo } = body;
+    const { items, total, discountAmount, userInfo, deliveryInfo } = body;
 
     if (!items || items.length === 0) {
       return NextResponse.json({ error: "El carrito está vacío" }, { status: 400 });
@@ -64,13 +64,33 @@ export async function POST(request: Request) {
     }
 
     // Mapeamos los items del carrito al formato que pide Mercado Pago
-    const preferenceItems = items.map((item: any) => ({
+    const preferenceItems: any[] = items.map((item: any) => ({
       id: item.id.toString(),
       title: item.name,
       quantity: item.quantity,
       unit_price: item.price,
       currency_id: "ARS",
     }));
+
+    if (deliveryInfo?.cost && deliveryInfo.cost > 0) {
+      preferenceItems.push({
+        id: "shipping",
+        title: `Envío a domicilio (${deliveryInfo.carrier} - ${deliveryInfo.service})`,
+        quantity: 1,
+        unit_price: deliveryInfo.cost,
+        currency_id: "ARS",
+      });
+    }
+
+    if (discountAmount && discountAmount > 0) {
+      preferenceItems.push({
+        id: "discount",
+        title: "Descuento por Cupón",
+        quantity: 1,
+        unit_price: -discountAmount, // Descuento negativo
+        currency_id: "ARS",
+      });
+    }
 
     let origin = request.headers.get("origin");
     if (!origin || origin === "null") {
