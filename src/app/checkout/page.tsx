@@ -142,6 +142,18 @@ export default function CheckoutPage() {
 
   const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (deliveryMethod === 'envio') {
+      if (!selectedShippingOption) {
+        alert("Por favor, selecciona una opción de envío de la lista.");
+        return;
+      }
+      if (!shippingAddress.trim()) {
+        alert("Por favor, completa tu dirección de envío.");
+        return;
+      }
+    }
+    
     setIsProcessingCheckout(true);
 
     try {
@@ -363,7 +375,7 @@ export default function CheckoutPage() {
               <button
                 type="submit"
                 form="checkout-form"
-                disabled={isProcessingCheckout || (deliveryMethod === 'envio' && (!selectedShippingOption || !shippingAddress.trim()))}
+                disabled={isProcessingCheckout}
                 className="w-full mt-8 flex items-center justify-center px-6 py-4 bg-[#009EE3] text-white font-medium hover:bg-[#008ACB] transition-colors shadow-lg rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isProcessingCheckout ? (
