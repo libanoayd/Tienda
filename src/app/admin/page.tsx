@@ -17,6 +17,7 @@ export default function AdminDashboard() {
   const [categoriesCount, setCategoriesCount] = useState<number>(0);
   const [couponsCount, setCouponsCount] = useState<number>(0);
   const [latestProducts, setLatestProducts] = useState<LatestProduct[]>([]);
+  const [lowStockProducts, setLowStockProducts] = useState<{id: number; name: string; stock: number}[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -38,6 +39,10 @@ export default function AdminDashboard() {
       // 4. Últimos productos agregados reales
       const { data: latest } = await supabase.from("products").select("id, name, price, brand").order("id", { ascending: false }).limit(4);
       if (latest) setLatestProducts(latest);
+
+      // 5. Productos con stock bajo
+      const { data: lowStock } = await supabase.from("products").select("id, name, stock").lte("stock", 3).eq("is_active", true).order("stock", { ascending: true });
+      if (lowStock) setLowStockProducts(lowStock);
 
       setLoading(false);
     }
@@ -89,6 +94,28 @@ export default function AdminDashboard() {
           <p className="text-xs text-stone-500 mt-2">Promociones listas</p>
         </div>
       </div>
+
+      {/* Alerta de Stock Bajo */}
+      {!loading && lowStockProducts.length > 0 && (
+        <div className="mb-8 bg-red-50 p-6 rounded-xl border border-red-200">
+          <h3 className="text-lg font-serif text-red-900 mb-2 flex items-center">
+            ⚠️ Atención: Productos con stock bajo
+          </h3>
+          <p className="text-red-700 text-sm mb-4">
+            Los siguientes productos tienen 3 o menos unidades disponibles. Recuerda reponer inventario.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {lowStockProducts.map((p) => (
+              <div key={p.id} className="bg-white p-3 rounded-lg border border-red-100 shadow-sm flex justify-between items-center">
+                <span className="text-sm font-medium text-stone-900 truncate pr-2">{p.name}</span>
+                <span className={`text-xs font-bold px-2 py-1 rounded-md ${p.stock === 0 ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>
+                  {p.stock} unid.
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Accesos Rápidos y Últimos Productos Reales */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

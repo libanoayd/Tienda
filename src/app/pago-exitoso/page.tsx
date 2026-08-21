@@ -18,13 +18,7 @@ export default function PagoExitoso() {
     
     if (externalRef) {
       setOrderId(externalRef);
-      
-      // Enviar correo de confirmación de forma asíncrona
-      fetch("/api/send-email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderId: externalRef })
-      }).catch(err => console.error("Error al enviar email:", err));
+      // El correo y el descuento de stock ahora se manejan automáticamente vía Webhook
     }
   }, [clearCart]);
 

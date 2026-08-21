@@ -104,6 +104,7 @@ export async function POST(request: Request) {
       body: {
         items: preferenceItems,
         external_reference: orderData.id.toString(), // Enviamos el ID de orden a MP
+        notification_url: `${origin}/api/webhooks/mercadopago`, // Webhook automático
         back_urls: {
           success: `${origin}/pago-exitoso`,
           failure: `${origin}/pago-fallido`,
