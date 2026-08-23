@@ -52,3 +52,7 @@ El esquema completo de la base de datos se encuentra en `database_schema.sql` (E
 
 ## 📷 Almacenamiento
 Imágenes servidas gratuitamente mediante enlaces directos optimizados (`?sz=w800`) desde Google Drive, sin costos de hosting por almacenamiento en Supabase/Vercel.
+
+## Diseño y Marca
+Consulta el [Manual de Marca](./MANUAL_DE_MARCA.md) para conocer la paleta de colores oficial y lineamientos visuales.
+

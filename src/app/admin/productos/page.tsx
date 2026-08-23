@@ -163,7 +163,7 @@ export default function AdminProductos() {
     fetchData();
   };
 
-  const handleQuickUpdate = async (productId: number, field: string, value: number) => {
+  const handleQuickUpdate = async (productId: number, field: string, value: any) => {
     // Update local state for immediate feedback
     setProducts(products.map(p => p.id === productId ? { ...p, [field]: value } : p));
     
@@ -279,6 +279,7 @@ export default function AdminProductos() {
                   <th className="py-4 px-6 font-medium">Presentación</th>
                   <th className="py-4 px-6 font-medium">Stock</th>
                   <th className="py-4 px-6 font-medium">Precio</th>
+                  <th className="py-4 px-6 font-medium text-center">Visible</th>
                   <th className="py-4 px-6 font-medium text-right">Acciones</th>
                 </tr>
               </thead>
@@ -344,6 +345,19 @@ export default function AdminProductos() {
                         }
                       }}
                     />
+                  </td>
+                  <td className="py-3 px-6 text-center">
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input 
+                        type="checkbox" 
+                        className="sr-only peer" 
+                        checked={product.is_active !== false}
+                        onChange={(e) => {
+                          if (product.id) handleQuickUpdate(product.id, "is_active", e.target.checked);
+                        }}
+                      />
+                      <div className="w-9 h-5 bg-stone-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[var(--color-brand-green)] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[var(--color-brand-green)]"></div>
+                    </label>
                   </td>
                   <td className="py-3 px-6 text-right space-x-2">
                     <button

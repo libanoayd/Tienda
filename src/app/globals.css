@@ -10,11 +10,12 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --color-brand-green: #207473;
-  --color-brand-dark: #133C37;
-  --color-brand-mint: #E2B370; /* Repurposed for Gold/Sand */
-  --color-brand-terra: #E65B3A;
-  --color-brand-stone: #F5F5F4;
+  --color-brand-green: #0A8280;
+  --color-brand-dark: #425752;
+  --color-brand-mint: #A89D5B; /* Olive/Gold */
+  --color-brand-terra: #D97D5B;
+  --color-brand-red: #BF2A2A;
+  --color-brand-stone: #F9F9F9;
 }
 
 @media (prefers-color-scheme: dark) {

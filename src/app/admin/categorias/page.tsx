@@ -1,8 +1,9 @@
+﻿
 "use client";
 
 import React, { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { Plus, FolderPlus, Trash2, Edit2, Save, X, CornerDownRight } from "lucide-react";
+import { Plus, FolderTree, Trash2, Edit2, Save, X, Tags } from "lucide-react";
 
 interface Category {
   id?: number;
@@ -11,61 +12,12 @@ interface Category {
   parent_id?: number | null;
 }
 
-const CategoryRow = ({ category, allCategories, level, onEdit, onDelete }: any) => {
-  const children = allCategories.filter((c: Category) => c.parent_id === category.id);
-  const paddingLeft = level === 0 ? "px-6" : `px-6`;
-  const customIndent = level > 0 ? { paddingLeft: `${1.5 * level + 1.5}rem` } : {};
-
-  return (
-    <React.Fragment>
-      <tr className={`hover:bg-stone-50/50 transition-colors ${level === 0 ? 'bg-stone-50/30' : ''}`}>
-        <td className={`py-${level === 0 ? '4' : '3'} ${paddingLeft} font-${level === 0 ? 'semibold' : 'medium'} text-${level === 0 ? '[var(--color-brand-dark)]' : 'stone-700'} flex items-center`} style={customIndent}>
-          {level === 0 ? (
-            <FolderPlus className="h-4 w-4 mr-3 text-[var(--color-brand-green)]" />
-          ) : (
-            <CornerDownRight className="h-4 w-4 mr-2 text-stone-300" />
-          )}
-          {category.name}
-        </td>
-        <td className={`py-${level === 0 ? '4' : '3'} px-6 text-${level === 0 ? 'stone-500' : 'stone-400'} font-mono text-xs`}>
-          {category.slug}
-        </td>
-        <td className={`py-${level === 0 ? '4' : '3'} px-6 text-right space-x-2`}>
-          <button
-            onClick={() => onEdit(category)}
-            className="p-2 text-stone-600 hover:text-[var(--color-brand-green)] hover:bg-stone-100 rounded-md transition-colors"
-          >
-            <Edit2 className="h-4 w-4" />
-          </button>
-          <button
-            onClick={() => category.id && onDelete(category.id)}
-            className="p-2 text-stone-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
-          >
-            <Trash2 className="h-4 w-4" />
-          </button>
-        </td>
-      </tr>
-      {children.map((child: Category) => (
-        <CategoryRow 
-          key={child.id} 
-          category={child} 
-          allCategories={allCategories} 
-          level={level + 1} 
-          onEdit={onEdit} 
-          onDelete={onDelete} 
-        />
-      ))}
-    </React.Fragment>
-  );
-};
-
 export default function AdminCategorias() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
 
-  // Form state
   const [name, setName] = useState("");
   const [parentId, setParentId] = useState<number | "">("");
 
@@ -88,28 +40,19 @@ export default function AdminCategorias() {
     e.preventDefault();
     if (!name.trim()) return alert("Ingresa el nombre de la sección.");
 
-    const slug = name
-      .toLowerCase()
-      .trim()
-      .replace(/[^\w\s-]/g, "")
-      .replace(/[\s_-]+/g, "-");
-
+    const slug = name.toLowerCase().trim().replace(/[^\w\s-]/g, "").replace(/[\s_-]+/g, "-");
     if (editingCategory?.id && parentId === editingCategory.id) {
       return alert("Una categoría no puede ser subcategoría de sí misma.");
     }
 
-    const payload = { 
-      name: name.trim(), 
-      slug, 
-      parent_id: parentId === "" ? null : parentId 
+    const payload = {
+      name,
+      slug,
+      parent_id: parentId === "" ? null : parentId,
     };
 
     if (editingCategory?.id) {
-      const { error } = await supabase
-        .from("categories")
-        .update(payload)
-        .eq("id", editingCategory.id);
-
+      const { error } = await supabase.from("categories").update(payload).eq("id", editingCategory.id);
       if (error) alert("Error al actualizar: " + error.message);
     } else {
       const { error } = await supabase.from("categories").insert([payload]);
@@ -144,16 +87,15 @@ export default function AdminCategorias() {
     setParentId("");
   };
 
-  // Organizar jerárquicamente para la vista
   const parentCategories = categories.filter(c => !c.parent_id);
 
   return (
     <div className="p-8">
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
-          <h1 className="text-3xl font-serif text-stone-900">Gestión de Secciones / Categorías</h1>
+          <h1 className="text-3xl font-serif text-stone-900">Secciones y Categorías</h1>
           <p className="text-stone-500 text-sm mt-1">
-            Crea las secciones de tu tienda (ej: Velas, Sahumerios) y subcategorías (ej: Velas de Soja).
+            Organiza tu tienda visualmente. Crea secciones principales y agrega subcategorías.
           </p>
         </div>
         <button
@@ -164,35 +106,76 @@ export default function AdminCategorias() {
         </button>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-stone-200 overflow-hidden max-w-3xl">
+      <div className="max-w-5xl">
         {loading ? (
-          <div className="p-12 text-center text-stone-500">Cargando secciones...</div>
+          <div className="p-12 text-center text-stone-500 bg-white rounded-xl shadow-sm border border-stone-200">Cargando secciones...</div>
         ) : categories.length === 0 ? (
-          <div className="p-12 text-center text-stone-500">
+          <div className="p-12 text-center text-stone-500 bg-white rounded-xl shadow-sm border border-stone-200">
             No hay secciones creadas todavía. ¡Crea la primera para organizar tu catálogo!
           </div>
         ) : (
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-stone-50 border-b border-stone-200 text-stone-500 text-sm">
-                <th className="py-4 px-6 font-medium">Nombre de la Sección</th>
-                <th className="py-4 px-6 font-medium">Identificador (Slug)</th>
-                <th className="py-4 px-6 font-medium text-right">Acción</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-stone-100 text-sm">
-              {parentCategories.map((parent) => (
-                <CategoryRow 
-                  key={parent.id} 
-                  category={parent} 
-                  allCategories={categories}
-                  level={0}
-                  onEdit={openEditModal}
-                  onDelete={handleDelete}
-                />
-              ))}
-            </tbody>
-          </table>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {parentCategories.map((parent) => {
+              const children = categories.filter((c) => c.parent_id === parent.id);
+              
+              return (
+                <div key={parent.id} className="bg-white rounded-xl shadow-sm border border-stone-200 overflow-hidden hover:border-[var(--color-brand-green)]/30 transition-colors group">
+                  <div className="p-5 border-b border-stone-100 flex justify-between items-start bg-stone-50/50">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-[var(--color-brand-green)]/10 rounded-lg text-[var(--color-brand-green)]">
+                        <FolderTree className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-stone-900">{parent.name}</h3>
+                        <p className="text-xs text-stone-400 font-mono mt-0.5">{parent.slug}</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button onClick={() => openEditModal(parent)} className="p-1.5 text-stone-400 hover:text-[var(--color-brand-green)] rounded-md hover:bg-stone-100" title="Editar">
+                        <Edit2 className="h-3.5 w-3.5" />
+                      </button>
+                      <button onClick={() => parent.id && handleDelete(parent.id)} className="p-1.5 text-stone-400 hover:text-red-500 rounded-md hover:bg-red-50" title="Eliminar">
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div className="p-5">
+                    <h4 className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-3 flex items-center">
+                      <Tags className="h-3.5 w-3.5 mr-1" /> Subcategorías ({children.length})
+                    </h4>
+                    
+                    {children.length > 0 ? (
+                      <ul className="space-y-2">
+                        {children.map(child => (
+                          <li key={child.id} className="flex justify-between items-center group/item p-2 rounded-lg hover:bg-stone-50 border border-transparent hover:border-stone-100 transition-colors">
+                            <span className="text-sm text-stone-700">{child.name}</span>
+                            <div className="flex gap-1 opacity-0 group-hover/item:opacity-100 transition-opacity">
+                              <button onClick={() => openEditModal(child)} className="p-1 text-stone-400 hover:text-[var(--color-brand-green)]">
+                                <Edit2 className="h-3 w-3" />
+                              </button>
+                              <button onClick={() => child.id && handleDelete(child.id)} className="p-1 text-stone-400 hover:text-red-500">
+                                <Trash2 className="h-3 w-3" />
+                              </button>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-sm text-stone-400 italic">No hay subcategorías.</p>
+                    )}
+                    
+                    <button 
+                      onClick={() => { resetForm(); setParentId(parent.id || ""); setShowModal(true); }}
+                      className="mt-4 text-xs font-medium text-[var(--color-brand-green)] hover:text-[var(--color-brand-dark)] flex items-center"
+                    >
+                      <Plus className="h-3.5 w-3.5 mr-1" /> Añadir subcategoría
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         )}
       </div>
 
@@ -222,14 +205,14 @@ export default function AdminCategorias() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">¿Es subcategoría de...?</label>
+                <label className="block text-sm font-medium text-stone-700 mb-1">¿Pertenece a otra sección?</label>
                 <select
                   value={parentId}
                   onChange={(e) => setParentId(e.target.value === "" ? "" : Number(e.target.value))}
                   className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-[var(--color-brand-green)] focus:outline-none"
                 >
-                  <option value="">Ninguna (Es una Categoría Principal)</option>
-                  {categories
+                  <option value="">Ninguna (Es una Sección Principal)</option>
+                  {parentCategories
                     .filter(cat => cat.id !== editingCategory?.id)
                     .map(cat => (
                       <option key={cat.id} value={cat.id || ""}>
@@ -237,6 +220,7 @@ export default function AdminCategorias() {
                       </option>
                   ))}
                 </select>
+                <p className="text-xs text-stone-500 mt-1">Si eliges una sección, esta será una subcategoría.</p>
               </div>
 
               <div className="pt-4 flex justify-end space-x-3 border-t border-stone-100">
@@ -261,3 +245,4 @@ export default function AdminCategorias() {
     </div>
   );
 }
+
