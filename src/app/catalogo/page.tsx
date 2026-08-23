@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useEffect, useState, useMemo, Suspense } from "react";
 import { supabase } from "@/lib/supabase";
@@ -33,7 +33,7 @@ function CatalogoContent() {
     async function loadData() {
       setLoading(true);
 
-      // Cargar CategorÃ­as de Supabase
+      // Cargar Categorías de Supabase
       const { data: catData } = await supabase.from("categories").select("*");
       if (catData && catData.length > 0) {
         setCategories(catData);
@@ -53,12 +53,12 @@ function CatalogoContent() {
         }));
         setProducts(mapped);
       } else {
-        // Fallback inicial si la base de datos estÃ¡ vacÃ­a
+        // Fallback inicial si la base de datos está vacía
         setProducts([
           { id: 1, name: "Yagra", price: 4500, image: "/productos/yagra.png", stock: 10 } as any,
           { id: 2, name: "Caja Palo Santo", price: 8900, image: "/productos/palo-santo.png", stock: 5 } as any,
           { id: 3, name: "Incienso", price: 3200, image: "/productos/incienso.png", stock: 0 } as any,
-          { id: 4, name: "Conos AromÃ¡ticos", price: 5400, image: "/productos/conos.png", stock: 2 } as any,
+          { id: 4, name: "Conos Aromáticos", price: 5400, image: "/productos/conos.png", stock: 2 } as any,
         ]);
       }
 
@@ -72,7 +72,7 @@ function CatalogoContent() {
   const filteredAndSortedProducts = useMemo(() => {
     let result = [...products];
 
-    // Helper para obtener la categorÃ­a y todos sus hijos/nietos
+    // Helper para obtener la categoría y todos sus hijos/nietos
     const getAllCategoryIds = (parentId: number): number[] => {
       let ids = [parentId];
       const children = categories.filter((c) => c.parent_id === parentId);
@@ -82,14 +82,14 @@ function CatalogoContent() {
       return ids;
     };
 
-    // 1. Filtrar por CategorÃ­a
+    // 1. Filtrar por Categoría
     if (selectedCategory !== "todos") {
       const selectedId = parseInt(selectedCategory);
       const allowedCategoryIds = getAllCategoryIds(selectedId);
       result = result.filter((p: any) => allowedCategoryIds.includes(p.category_id));
     }
 
-    // 2. Filtrar por BÃºsqueda
+    // 2. Filtrar por Búsqueda
     if (searchQuery.trim() !== "") {
       const query = searchQuery.toLowerCase();
       result = result.filter((p) => p.name.toLowerCase().includes(query));
@@ -101,7 +101,7 @@ function CatalogoContent() {
     } else if (sortBy === "price-desc") {
       result.sort((a, b) => b.price - a.price);
     } else {
-      // newest (por ID descendente asumiendo que IDs mÃ¡s grandes son mÃ¡s nuevos)
+      // newest (por ID descendente asumiendo que IDs más grandes son más nuevos)
       result.sort((a, b) => b.id - a.id);
     }
 
@@ -114,7 +114,7 @@ function CatalogoContent() {
       .map((cat) => (
         <React.Fragment key={cat.id}>
           <option value={cat.id.toString()}>
-            {"\u00A0\u00A0".repeat(level)} {level > 0 ? "â”” " : ""}{cat.name}
+            {"\u00A0\u00A0".repeat(level)} {level > 0 ? "└ " : ""}{cat.name}
           </option>
           {renderCategoryOptions(cat.id, level + 1)}
         </React.Fragment>
@@ -124,21 +124,21 @@ function CatalogoContent() {
   return (
     <div className="flex flex-col min-h-screen bg-[var(--color-brand-stone)] pt-28">
       
-      {/* Encabezado del catÃ¡logo */}
+      {/* Encabezado del catálogo */}
       <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full mb-8">
         <div className="text-center">
-          <h1 className="text-4xl md:text-5xl font-serif text-[var(--color-brand-dark)] mb-6">Nuestro CatÃ¡logo</h1>
+          <h1 className="text-4xl md:text-5xl font-serif text-[var(--color-brand-dark)] mb-6">Nuestro Catálogo</h1>
           <p className="text-stone-600 max-w-2xl mx-auto">
-            Explora nuestra cuidada selecciÃ³n de aromas y objetos decorativos diseÃ±ados para transformar cada rincÃ³n de tu hogar en un espacio Ãºnico.
+            Explora nuestra cuidada selección de aromas y objetos decorativos diseñados para transformar cada rincón de tu hogar en un espacio único.
           </p>
         </div>
       </section>
 
-      {/* Controles: BÃºsqueda, Filtros y Ordenamiento */}
+      {/* Controles: Búsqueda, Filtros y Ordenamiento */}
       <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full mb-12">
         <div className="bg-white p-4 rounded-xl shadow-sm border border-stone-200 space-y-4 md:space-y-0 md:flex md:items-center md:justify-between">
           
-          {/* BÃºsqueda */}
+          {/* Búsqueda */}
           <div className="relative flex-1 max-w-md">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search className="h-4 w-4 text-stone-400" />
@@ -153,13 +153,13 @@ function CatalogoContent() {
           </div>
 
           <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 items-center">
-            {/* CategorÃ­as (Dropdown on mobile, buttons on desktop if space allows, or just select) */}
+            {/* Categorías (Dropdown on mobile, buttons on desktop if space allows, or just select) */}
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
               className="w-full sm:w-auto px-4 py-2 border border-stone-300 rounded-md text-sm focus:ring-[var(--color-brand-green)] focus:border-[var(--color-brand-green)] bg-white"
             >
-              <option value="todos">Todas las categorÃ­as</option>
+              <option value="todos">Todas las categorías</option>
               {renderCategoryOptions(null, 0)}
             </select>
 
@@ -169,7 +169,7 @@ function CatalogoContent() {
               onChange={(e) => setSortBy(e.target.value)}
               className="w-full sm:w-auto px-4 py-2 border border-stone-300 rounded-md text-sm focus:ring-[var(--color-brand-green)] focus:border-[var(--color-brand-green)]"
             >
-              <option value="newest">MÃ¡s recientes</option>
+              <option value="newest">Más recientes</option>
               <option value="price-asc">Menor precio</option>
               <option value="price-desc">Mayor precio</option>
             </select>
@@ -182,7 +182,7 @@ function CatalogoContent() {
         {loading ? (
           <div className="text-center py-12 text-stone-500">Cargando productos...</div>
         ) : filteredAndSortedProducts.length === 0 ? (
-          <div className="text-center py-12 text-stone-500">No hay productos que coincidan con tu bÃºsqueda.</div>
+          <div className="text-center py-12 text-stone-500">No hay productos que coincidan con tu búsqueda.</div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-12">
             {filteredAndSortedProducts.map((product) => (
@@ -195,4 +195,10 @@ function CatalogoContent() {
   );
 }
 
-export default function Catalogo() { return <Suspense fallback={<div>Cargando...</div>}><CatalogoContent /></Suspense>; }
+export default function Catalogo() {
+  return (
+    <Suspense fallback={<div className="text-center pt-32">Cargando...</div>}>
+      <CatalogoContent />
+    </Suspense>
+  );
+}
