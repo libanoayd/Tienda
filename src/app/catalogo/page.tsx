@@ -1,3 +1,4 @@
+﻿
 "use client";
 
 import React, { useEffect, useState, useMemo, Suspense } from "react";
@@ -22,8 +23,11 @@ function CatalogoContent() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("todos");
   const [searchQuery, setSearchQuery] = useState(queryQ);
-  const [sortBy, setSortBy] = useState("newest"); // 'newest', 'price-asc', 'price-desc'
+  const [sortBy, setSortBy] = useState("newest"); // "newest", "price-asc", "price-desc"
   const [loading, setLoading] = useState(true);
+  
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 12;
 
   useEffect(() => {
     setSearchQuery(queryQ);
@@ -33,13 +37,11 @@ function CatalogoContent() {
     async function loadData() {
       setLoading(true);
 
-      // Cargar Categorías de Supabase
       const { data: catData } = await supabase.from("categories").select("*");
       if (catData && catData.length > 0) {
         setCategories(catData);
       }
 
-      // Cargar Productos de Supabase
       const { data: prodData } = await supabase.from("products").select("*").eq("is_active", true);
 
       if (prodData && prodData.length > 0) {
@@ -52,27 +54,15 @@ function CatalogoContent() {
           stock: p.stock ?? 0,
         }));
         setProducts(mapped);
-      } else {
-        // Fallback inicial si la base de datos está vacía
-        setProducts([
-          { id: 1, name: "Yagra", price: 4500, image: "/productos/yagra.png", stock: 10 } as any,
-          { id: 2, name: "Caja Palo Santo", price: 8900, image: "/productos/palo-santo.png", stock: 5 } as any,
-          { id: 3, name: "Incienso", price: 3200, image: "/productos/incienso.png", stock: 0 } as any,
-          { id: 4, name: "Conos Aromáticos", price: 5400, image: "/productos/conos.png", stock: 2 } as any,
-        ]);
       }
-
       setLoading(false);
     }
-
     loadData();
   }, []);
 
-  // Filtrar y ordenar productos
   const filteredAndSortedProducts = useMemo(() => {
     let result = [...products];
 
-    // Helper para obtener la categoría y todos sus hijos/nietos
     const getAllCategoryIds = (parentId: number): number[] => {
       let ids = [parentId];
       const children = categories.filter((c) => c.parent_id === parentId);
@@ -82,49 +72,41 @@ function CatalogoContent() {
       return ids;
     };
 
-    // 1. Filtrar por Categoría
     if (selectedCategory !== "todos") {
       const selectedId = parseInt(selectedCategory);
       const allowedCategoryIds = getAllCategoryIds(selectedId);
       result = result.filter((p: any) => allowedCategoryIds.includes(p.category_id));
     }
 
-    // 2. Filtrar por Búsqueda
     if (searchQuery.trim() !== "") {
       const query = searchQuery.toLowerCase();
       result = result.filter((p) => p.name.toLowerCase().includes(query));
     }
 
-    // 3. Ordenar
     if (sortBy === "price-asc") {
       result.sort((a, b) => a.price - b.price);
     } else if (sortBy === "price-desc") {
       result.sort((a, b) => b.price - a.price);
     } else {
-      // newest (por ID descendente asumiendo que IDs más grandes son más nuevos)
       result.sort((a, b) => b.id - a.id);
     }
 
     return result;
-  }, [products, selectedCategory, searchQuery, sortBy]);
+  }, [products, selectedCategory, searchQuery, sortBy, categories]);
 
-  const renderCategoryOptions = (parentId: number | null = null, level: number = 0): React.ReactNode[] => {
-    return categories
-      .filter((cat) => cat.parent_id === parentId)
-      .map((cat) => (
-        <React.Fragment key={cat.id}>
-          <option value={cat.id.toString()}>
-            {"\u00A0\u00A0".repeat(level)} {level > 0 ? "└ " : ""}{cat.name}
-          </option>
-          {renderCategoryOptions(cat.id, level + 1)}
-        </React.Fragment>
-      ));
-  };
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, selectedCategory, sortBy]);
+
+  const totalPages = Math.ceil(filteredAndSortedProducts.length / itemsPerPage);
+  const paginatedProducts = filteredAndSortedProducts.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   return (
-    <div className="flex flex-col min-h-screen bg-[var(--color-brand-stone)] pt-28">
+    <div className="flex flex-col min-h-screen bg-[var(--color-brand-stone)] pt-28 pb-24">
       
-      {/* Encabezado del catálogo */}
       <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full mb-8">
         <div className="text-center">
           <h1 className="text-4xl md:text-5xl font-serif text-[var(--color-brand-dark)] mb-6">Nuestro Catálogo</h1>
@@ -134,62 +116,136 @@ function CatalogoContent() {
         </div>
       </section>
 
-      {/* Controles: Búsqueda, Filtros y Ordenamiento */}
-      <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full mb-12">
-        <div className="bg-white p-4 rounded-xl shadow-sm border border-stone-200 space-y-4 md:space-y-0 md:flex md:items-center md:justify-between">
+      <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+        <div className="flex flex-col lg:flex-row gap-8">
           
-          {/* Búsqueda */}
-          <div className="relative flex-1 max-w-md">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search className="h-4 w-4 text-stone-400" />
+          <aside className="w-full lg:w-64 flex-shrink-0">
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-stone-200 lg:sticky lg:top-32">
+              <h3 className="font-serif text-lg text-stone-900 mb-4 border-b border-stone-100 pb-2">Buscar</h3>
+              <div className="relative w-full mb-6">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Search className="h-4 w-4 text-stone-400" />
+                </div>
+                <input
+                  type="text"
+                  placeholder="Buscar productos..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 w-full px-3 py-2 border border-stone-300 rounded-md text-sm focus:ring-[var(--color-brand-green)] focus:border-[var(--color-brand-green)]"
+                />
+              </div>
+
+              <h3 className="font-serif text-lg text-stone-900 mb-4 border-b border-stone-100 pb-2">Categorías</h3>
+              <ul className="space-y-2 text-sm text-stone-600 max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar">
+                <li>
+                  <button 
+                    onClick={() => setSelectedCategory("todos")}
+                    className={`w-full text-left px-2 py-1.5 rounded-md transition-colors ${selectedCategory === "todos" ? "bg-[var(--color-brand-green)]/10 text-[var(--color-brand-green)] font-medium" : "hover:bg-stone-50"}`}
+                  >
+                    Todas las categorías
+                  </button>
+                </li>
+                {categories.filter(c => !c.parent_id).map((cat) => (
+                  <React.Fragment key={cat.id}>
+                    <li>
+                      <button 
+                        onClick={() => setSelectedCategory(cat.id.toString())}
+                        className={`w-full text-left px-2 py-1.5 rounded-md transition-colors ${selectedCategory === cat.id.toString() ? "bg-[var(--color-brand-green)]/10 text-[var(--color-brand-green)] font-medium" : "hover:bg-stone-50"}`}
+                      >
+                        {cat.name}
+                      </button>
+                    </li>
+                    {categories.filter(sub => sub.parent_id === cat.id).map(sub => (
+                      <li key={sub.id}>
+                        <button 
+                          onClick={() => setSelectedCategory(sub.id.toString())}
+                          className={`w-full text-left px-2 py-1.5 pl-6 rounded-md transition-colors ${selectedCategory === sub.id.toString() ? "bg-[var(--color-brand-green)]/10 text-[var(--color-brand-green)] font-medium" : "hover:bg-stone-50"}`}
+                        >
+                          └ {sub.name}
+                        </button>
+                      </li>
+                    ))}
+                  </React.Fragment>
+                ))}
+              </ul>
+
+              <h3 className="font-serif text-lg text-stone-900 mb-4 border-b border-stone-100 pb-2 mt-6">Ordenar por</h3>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="w-full px-3 py-2 border border-stone-300 rounded-md text-sm focus:ring-[var(--color-brand-green)] focus:border-[var(--color-brand-green)] bg-white"
+              >
+                <option value="newest">Más recientes</option>
+                <option value="price-asc">Menor precio</option>
+                <option value="price-desc">Mayor precio</option>
+              </select>
             </div>
-            <input
-              type="text"
-              placeholder="Buscar productos..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 w-full px-4 py-2 border border-stone-300 rounded-md text-sm focus:ring-[var(--color-brand-green)] focus:border-[var(--color-brand-green)]"
-            />
-          </div>
+          </aside>
 
-          <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 items-center">
-            {/* Categorías (Dropdown on mobile, buttons on desktop if space allows, or just select) */}
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full sm:w-auto px-4 py-2 border border-stone-300 rounded-md text-sm focus:ring-[var(--color-brand-green)] focus:border-[var(--color-brand-green)] bg-white"
-            >
-              <option value="todos">Todas las categorías</option>
-              {renderCategoryOptions(null, 0)}
-            </select>
+          <div className="flex-1">
+            <div className="mb-6 text-sm text-stone-500">
+              Mostrando {paginatedProducts.length} de {filteredAndSortedProducts.length} productos
+            </div>
 
-            {/* Ordenamiento */}
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="w-full sm:w-auto px-4 py-2 border border-stone-300 rounded-md text-sm focus:ring-[var(--color-brand-green)] focus:border-[var(--color-brand-green)]"
-            >
-              <option value="newest">Más recientes</option>
-              <option value="price-asc">Menor precio</option>
-              <option value="price-desc">Mayor precio</option>
-            </select>
+            {loading ? (
+              <div className="text-center py-12 text-stone-500">Cargando productos...</div>
+            ) : filteredAndSortedProducts.length === 0 ? (
+              <div className="text-center py-12 bg-white rounded-xl shadow-sm border border-stone-200">
+                <p className="text-stone-500 mb-4">No hay productos que coincidan con tu búsqueda.</p>
+                <button 
+                  onClick={() => { setSearchQuery(""); setSelectedCategory("todos"); }}
+                  className="text-[var(--color-brand-green)] hover:underline font-medium"
+                >
+                  Limpiar filtros
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-10">
+                  {paginatedProducts.map((product) => (
+                    <ProductCard key={product.id} product={product} />
+                  ))}
+                </div>
+
+                {totalPages > 1 && (
+                  <div className="mt-12 flex justify-center items-center space-x-2">
+                    <button
+                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                      disabled={currentPage === 1}
+                      className="px-4 py-2 border border-stone-300 rounded-md text-sm font-medium text-stone-600 bg-white hover:bg-stone-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      Anterior
+                    </button>
+                    
+                    <div className="flex flex-wrap gap-1 justify-center max-w-[60vw]">
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                        <button
+                          key={page}
+                          onClick={() => setCurrentPage(page)}
+                          className={`w-10 h-10 rounded-md text-sm font-medium transition-colors ${
+                            currentPage === page 
+                              ? "bg-[var(--color-brand-green)] text-white border-transparent" 
+                              : "border border-stone-300 text-stone-600 bg-white hover:bg-stone-50"
+                          }`}
+                        >
+                          {page}
+                        </button>
+                      ))}
+                    </div>
+
+                    <button
+                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                      disabled={currentPage === totalPages}
+                      className="px-4 py-2 border border-stone-300 rounded-md text-sm font-medium text-stone-600 bg-white hover:bg-stone-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      Siguiente
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
           </div>
         </div>
-      </section>
-
-      {/* Grilla de Productos */}
-      <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full pb-24">
-        {loading ? (
-          <div className="text-center py-12 text-stone-500">Cargando productos...</div>
-        ) : filteredAndSortedProducts.length === 0 ? (
-          <div className="text-center py-12 text-stone-500">No hay productos que coincidan con tu búsqueda.</div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-12">
-            {filteredAndSortedProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-        )}
       </section>
     </div>
   );
@@ -202,3 +258,4 @@ export default function Catalogo() {
     </Suspense>
   );
 }
+
