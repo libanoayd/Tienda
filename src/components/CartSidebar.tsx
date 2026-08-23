@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useCartStore } from "@/store/cartStore";
-import { X, Minus, Plus, ShoppingBag, Tag, CheckCircle } from "lucide-react";
+import { X, Minus, Plus, ShoppingBag, Tag, CheckCircle, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
@@ -48,20 +48,38 @@ export function CartSidebar() {
                         <h3>{item.name}</h3>
                         <p className="ml-4">${(item.price * item.quantity).toLocaleString('es-AR')}</p>
                       </div>
+                      <p className="mt-1 text-xs text-stone-500">
+                        {item.selectedVariant && `Variante: ${item.selectedVariant}`}
+                      </p>
                     </div>
                     <div className="flex flex-1 items-end justify-between text-sm">
-                      <div className="flex items-center border border-stone-300 rounded-md">
-                        <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="px-3 py-1 text-stone-500 hover:text-stone-900 hover:bg-stone-100">
-                          <Minus className="h-4 w-4" />
+                      <div className="flex items-center border border-stone-200 rounded-md">
+                        <button
+                          type="button"
+                          className="px-2 py-1 text-stone-500 hover:text-stone-900"
+                          onClick={() => updateQuantity(item.cartItemId, item.quantity - 1)}
+                        >
+                          -
                         </button>
-                        <span className="px-3 py-1 font-medium">{item.quantity}</span>
-                        <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="px-3 py-1 text-stone-500 hover:text-stone-900 hover:bg-stone-100">
-                          <Plus className="h-4 w-4" />
+                        <span className="px-2 text-stone-900 font-medium">{item.quantity}</span>
+                        <button
+                          type="button"
+                          className="px-2 py-1 text-stone-500 hover:text-stone-900"
+                          onClick={() => updateQuantity(item.cartItemId, item.quantity + 1)}
+                          disabled={item.quantity >= item.stock}
+                        >
+                          +
                         </button>
                       </div>
-                      <button onClick={() => removeFromCart(item.id)} type="button" className="font-medium text-[var(--color-brand-terra)] hover:text-red-500">
-                        Eliminar
-                      </button>
+                      <div className="flex">
+                        <button
+                          type="button"
+                          className="font-medium text-red-500 hover:text-red-400 p-2"
+                          onClick={() => removeFromCart(item.cartItemId)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </li>

@@ -49,7 +49,12 @@ export function ProductCard({ product }: { product: Product }) {
             <button
               onClick={(e) => {
                 e.preventDefault();
-                addToCart(product);
+                if (product.variants && product.variants.length > 0) {
+                  // Redirect to product page to select variant
+                  window.location.href = `/producto/${product.id}`;
+                } else {
+                  addToCart(product);
+                }
               }}
               className="translate-y-4 group-hover:translate-y-0 transition-transform duration-300 bg-white text-[var(--color-brand-dark)] p-3 rounded-full shadow-lg hover:bg-[var(--color-brand-green)] hover:text-white"
               aria-label="Añadir al carrito"

@@ -15,6 +15,7 @@ interface Product {
   category_id?: number;
   is_active?: boolean;
   description?: string;
+  variants?: string[];
 }
 
 interface Category {
@@ -39,6 +40,7 @@ export default function AdminProductos() {
   const [categoryId, setCategoryId] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [description, setDescription] = useState("");
+  const [variantsString, setVariantsString] = useState("");
 
   // Google Drive Gallery State
   const [showDriveGallery, setShowDriveGallery] = useState(false);
@@ -130,6 +132,11 @@ export default function AdminProductos() {
       finalImageUrl = `https://drive.google.com/thumbnail?id=${driveMatch[1]}&sz=w800`;
     }
 
+    let parsedVariants: string[] = [];
+    if (variantsString.trim()) {
+      parsedVariants = variantsString.split(',').map(v => v.trim()).filter(v => v);
+    }
+
     const productData = {
       name,
       brand: brand || "Líbano",
@@ -139,6 +146,7 @@ export default function AdminProductos() {
       category_id: categoryId ? parseInt(categoryId) : null,
       image_url: finalImageUrl,
       description: description || "",
+      variants: parsedVariants,
     };
 
     if (editingProduct?.id) {
@@ -174,6 +182,7 @@ export default function AdminProductos() {
     setCategoryId(product.category_id ? product.category_id.toString() : "");
     setImageUrl(product.image_url);
     setDescription(product.description || "");
+    setVariantsString(product.variants ? product.variants.join(", ") : "");
     setShowModal(true);
   };
 
@@ -200,6 +209,7 @@ export default function AdminProductos() {
     setCategoryId("");
     setImageUrl("");
     setDescription("");
+    setVariantsString("");
   };
 
   return (
@@ -387,6 +397,17 @@ export default function AdminProductos() {
                 />
               </div>
 
+              <div>
+                <label className="block text-sm font-medium text-stone-700 mb-1">Variantes (opcional)</label>
+                <input
+                  type="text"
+                  value={variantsString}
+                  onChange={(e) => setVariantsString(e.target.value)}
+                  placeholder="Ej: Lavanda, Vainilla, Rosa (separadas por coma)"
+                  className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-[var(--color-brand-green)] focus:outline-none"
+                />
+              </div>
+              
               <div>
                 <label className="block text-sm font-medium text-stone-700 mb-1">URL de la Imagen</label>
                 <div className="flex gap-2">

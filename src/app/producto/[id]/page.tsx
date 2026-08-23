@@ -13,6 +13,7 @@ export default function ProductoDetail({ params }: { params: Promise<{ id: strin
   const [product, setProduct] = useState<Product | null>(null);
   const [related, setRelated] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedVariant, setSelectedVariant] = useState<string>("");
   const addToCart = useCartStore((state) => state.addToCart);
 
   useEffect(() => {
@@ -29,6 +30,7 @@ export default function ProductoDetail({ params }: { params: Promise<{ id: strin
           stock: data.stock !== undefined ? data.stock : 10,
           description: data.description,
           category_id: data.category_id,
+          variants: data.variants || [],
         });
 
         // 2. Fetch related products
@@ -126,9 +128,39 @@ export default function ProductoDetail({ params }: { params: Promise<{ id: strin
               {product.description || "Diseñado para transformar el ambiente de tu hogar. Elaborado con materias primas de la más alta calidad para garantizar una experiencia aromática prolongada y equilibrada."}
             </p>
 
+            {/* Variantes del Producto */}
+            {product.variants && product.variants.length > 0 && (
+              <div className="mb-8">
+                <h3 className="text-sm font-bold text-stone-900 tracking-wider uppercase mb-3">
+                  Elegí una opción:
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {product.variants.map((variant) => (
+                    <button
+                      key={variant}
+                      onClick={() => setSelectedVariant(variant)}
+                      className={`px-4 py-2 border rounded-full text-sm transition-colors ${
+                        selectedVariant === variant
+                          ? 'border-[var(--color-brand-green)] bg-[var(--color-brand-green)]/10 text-[var(--color-brand-green)] font-medium'
+                          : 'border-stone-200 text-stone-600 hover:border-stone-300 hover:bg-stone-50'
+                      }`}
+                    >
+                      {variant}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Botón Agregar al Carrito */}
             <button
-              onClick={() => addToCart(product)}
+              onClick={() => {
+                if (product.variants && product.variants.length > 0 && !selectedVariant) {
+                  alert("Por favor, seleccioná una opción antes de agregar al carrito.");
+                  return;
+                }
+                addToCart(product, selectedVariant);
+              }}
               disabled={product.stock <= 0}
               className={`w-full flex items-center justify-center px-8 py-4 font-medium uppercase tracking-wider text-sm shadow-lg rounded-lg mb-8 transition-colors
                 ${product.stock > 0 
