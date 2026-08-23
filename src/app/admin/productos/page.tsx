@@ -30,6 +30,7 @@ export default function AdminProductos() {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [filterCategory, setFilterCategory] = useState<string>("todos");
 
   // Form State con Variaciones y Stock
   const [name, setName] = useState("");
@@ -212,6 +213,10 @@ export default function AdminProductos() {
     setVariantsString("");
   };
 
+  const filteredProducts = filterCategory === "todos" 
+    ? products 
+    : products.filter(p => p.category_id?.toString() === filterCategory);
+
   return (
     <div className="p-8">
       <div className="flex justify-between items-center mb-8">
@@ -228,43 +233,64 @@ export default function AdminProductos() {
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-stone-200 overflow-hidden">
+        <div className="p-4 border-b border-stone-100 flex items-center justify-between bg-stone-50">
+          <div className="flex items-center space-x-2">
+            <span className="text-sm font-medium text-stone-600">Filtrar por Categoría:</span>
+            <select
+              value={filterCategory}
+              onChange={(e) => setFilterCategory(e.target.value)}
+              className="px-3 py-1.5 border border-stone-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-green)]"
+            >
+              <option value="todos">Todas las categorías</option>
+              {renderCategoryOptions()}
+            </select>
+          </div>
+          <div className="text-sm text-stone-500">
+            Mostrando {filteredProducts.length} producto(s)
+          </div>
+        </div>
         {loading ? (
           <div className="p-12 text-center text-stone-500">Cargando catálogo...</div>
-        ) : products.length === 0 ? (
+        ) : filteredProducts.length === 0 ? (
           <div className="p-12 text-center text-stone-500">
-            No hay productos cargados todavía en Supabase.
+            No hay productos cargados o que coincidan con este filtro.
           </div>
         ) : (
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-stone-50 border-b border-stone-200 text-stone-500 text-sm">
-                <th className="py-4 px-6 font-medium">Imagen</th>
-                <th className="py-4 px-6 font-medium">Producto</th>
-                <th className="py-4 px-6 font-medium">Marca</th>
-                <th className="py-4 px-6 font-medium">Presentación</th>
-                <th className="py-4 px-6 font-medium">Stock</th>
-                <th className="py-4 px-6 font-medium">Precio</th>
-                <th className="py-4 px-6 font-medium text-right">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-stone-100 text-sm">
-              {products.map((product) => (
-                <tr key={product.id} className="hover:bg-stone-50/50 transition-colors">
-                  <td className="py-3 px-6">
-                    <div className="h-12 w-12 rounded-lg bg-stone-100 border border-stone-200 overflow-hidden relative flex items-center justify-center">
-                      {product.image_url ? (
-                        <img src={product.image_url} alt={product.name} className="h-full w-full object-contain p-1" />
-                      ) : (
-                        <ImageIcon className="h-5 w-5 text-stone-400" />
-                      )}
-                    </div>
-                  </td>
-                  <td className="py-3 px-6 font-medium text-stone-900">{product.name}</td>
-                  <td className="py-3 px-6 text-stone-600">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-stone-100 text-stone-800">
-                      <Tag className="h-3 w-3 mr-1" /> {product.brand || "Líbano"}
-                    </span>
-                  </td>
+          <div className="overflow-x-auto max-h-[70vh]">
+            <table className="w-full text-left border-collapse relative">
+              <thead className="sticky top-0 bg-stone-50 z-10 shadow-sm">
+                <tr className="border-b border-stone-200 text-stone-500 text-sm">
+                  <th className="py-4 px-6 font-medium">Imagen</th>
+                  <th className="py-4 px-6 font-medium">Producto</th>
+                  <th className="py-4 px-6 font-medium">Categoría</th>
+                  <th className="py-4 px-6 font-medium">Marca</th>
+                  <th className="py-4 px-6 font-medium">Presentación</th>
+                  <th className="py-4 px-6 font-medium">Stock</th>
+                  <th className="py-4 px-6 font-medium">Precio</th>
+                  <th className="py-4 px-6 font-medium text-right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-stone-100 text-sm">
+                {filteredProducts.map((product) => (
+                  <tr key={product.id} className="hover:bg-stone-50/50 transition-colors">
+                    <td className="py-3 px-6">
+                      <div className="h-12 w-12 rounded-lg bg-stone-100 border border-stone-200 overflow-hidden relative flex items-center justify-center">
+                        {product.image_url ? (
+                          <img src={product.image_url} alt={product.name} className="h-full w-full object-contain p-1" />
+                        ) : (
+                          <ImageIcon className="h-5 w-5 text-stone-400" />
+                        )}
+                      </div>
+                    </td>
+                    <td className="py-3 px-6 font-medium text-stone-900">{product.name}</td>
+                    <td className="py-3 px-6 text-stone-600">
+                      {categories.find(c => c.id === product.category_id)?.name || "Sin Categoría"}
+                    </td>
+                    <td className="py-3 px-6 text-stone-600">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-stone-100 text-stone-800">
+                        <Tag className="h-3 w-3 mr-1" /> {product.brand || "Líbano"}
+                      </span>
+                    </td>
                   <td className="py-3 px-6 text-stone-600">
                     <span className="inline-flex items-center text-xs text-stone-500">
                       <Box className="h-3 w-3 mr-1" /> {product.presentation || "Unidad"}
@@ -298,6 +324,7 @@ export default function AdminProductos() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
 
