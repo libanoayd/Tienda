@@ -29,7 +29,7 @@ export default function AyudaPage() {
               <div>
                 <h3 className="text-lg font-bold text-stone-900 mb-2">¿Tienen local físico?</h3>
                 <p className="text-stone-600 leading-relaxed">
-                  Actualmente no contamos con un showroom abierto al público general para recorrer, pero podés pasar a retirar tus pedidos previamente abonados por nuestro punto de entrega (Pago Fácil Viajantes) en Suipacha 422, Mendoza.
+                  ¡Sí! Tenemos nuestra sucursal física ubicada en Suipacha 422, Mendoza. Te esperamos para que puedas conocer y probar todos nuestros aromas en persona.
                 </p>
               </div>
               <div>
