@@ -1,3 +1,4 @@
+
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
@@ -59,53 +60,52 @@ export default function RootLayout({
         
         <WhatsAppButton />
 
-        {/* Footer */}
-        <footer className="bg-[var(--color-brand-dark)] text-stone-300">
+        <footer className="bg-[var(--color-brand-dark)] text-stone-200">
           <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
               <div>
-                <div className="relative h-24 w-24 mb-4 opacity-100 bg-white/10 rounded-md p-2">
-                  <Image src="/logo-oficial.png" alt="Líbano Logo" fill sizes="96px" className="object-contain" />
+                <div className="relative h-28 w-28 mb-6 flex items-center justify-center">
+                  <Image src="/logo-oficial.png" alt="Líbano Logo" fill sizes="112px" className="object-contain" />
                 </div>
-                <p className="text-stone-400 text-sm">
+                <p className="text-stone-300 text-sm leading-relaxed">
                   Transformando tus espacios en lugares mágicos a través del aroma y la decoración.
                 </p>
               </div>
               <div>
-                <h3 className="text-sm font-bold text-white tracking-wider uppercase mb-4">Navegación</h3>
-                <ul className="space-y-4">
+                <h3 className="text-sm font-bold text-white tracking-wider uppercase mb-5">Navegación</h3>
+                <ul className="space-y-3">
                   <li>
-                    <Link href="/nosotros" className="text-base text-stone-400 hover:text-white transition-colors">Nosotros</Link>
+                    <Link href="/nosotros" className="text-sm text-stone-300 hover:text-white transition-colors">Nosotros</Link>
                   </li>
                   <li>
-                    <Link href="/catalogo" className="text-base text-stone-400 hover:text-white transition-colors">Catálogo</Link>
+                    <Link href="/catalogo" className="text-sm text-stone-300 hover:text-white transition-colors">Catálogo</Link>
                   </li>
                   <li>
-                    <Link href="/contacto" className="text-base text-stone-400 hover:text-white transition-colors">Contacto</Link>
-                  </li>
-                </ul>
-              </div>
-              <div>
-                <h3 className="text-sm font-bold text-white tracking-wider uppercase mb-4">Ayuda</h3>
-                <ul className="space-y-4">
-                  <li>
-                    <Link href="/ayuda" className="text-base text-stone-400 hover:text-white transition-colors">Preguntas Frecuentes</Link>
-                  </li>
-                  <li>
-                    <Link href="/ayuda#envios" className="text-base text-stone-400 hover:text-white transition-colors">Políticas de Envío</Link>
-                  </li>
-                  <li>
-                    <Link href="/ayuda#devoluciones" className="text-base text-stone-400 hover:text-white transition-colors">Cambios y Devoluciones</Link>
+                    <Link href="/contacto" className="text-sm text-stone-300 hover:text-white transition-colors">Contacto</Link>
                   </li>
                 </ul>
               </div>
               <div>
-                <h3 className="text-sm font-bold text-white tracking-wider uppercase mb-4">Visítanos</h3>
-                <ul className="space-y-4">
+                <h3 className="text-sm font-bold text-white tracking-wider uppercase mb-5">Ayuda</h3>
+                <ul className="space-y-3">
+                  <li>
+                    <Link href="/ayuda" className="text-sm text-stone-300 hover:text-white transition-colors">Preguntas Frecuentes</Link>
+                  </li>
+                  <li>
+                    <Link href="/ayuda#envios" className="text-sm text-stone-300 hover:text-white transition-colors">Políticas de Envío</Link>
+                  </li>
+                  <li>
+                    <Link href="/ayuda#devoluciones" className="text-sm text-stone-300 hover:text-white transition-colors">Cambios y Devoluciones</Link>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-white tracking-wider uppercase mb-5">Visítanos</h3>
+                <ul className="space-y-3">
                   <li className="flex items-start">
-                    <MapPin className="h-5 w-5 text-[var(--color-brand-mint)] mr-2 flex-shrink-0" />
-                    <span className="text-base text-stone-400">
-                      <strong className="text-white">Pago Fácil Viajantes</strong><br />
+                    <MapPin className="h-5 w-5 text-[var(--color-brand-mint)] mr-3 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm text-stone-300 leading-relaxed">
+                      <strong className="text-white font-semibold">Pago Fácil Viajantes</strong><br />
                       Suipacha 422, 6ta Sección<br />
                       Ciudad de Mendoza
                     </span>
@@ -113,50 +113,28 @@ export default function RootLayout({
                 </ul>
               </div>
             </div>
-            <div className="mt-8 border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center">
-              <p className="text-base text-stone-500">
-                &copy; 2026 Líbano Aromas y Decoración.
+            <div className="mt-12 border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center">
+              <p className="text-sm text-stone-400">
+                &copy; 2026 Líbano Aromas y Decoración. Todos los derechos reservados.
               </p>
-              <div className="flex space-x-6 mt-4 md:mt-0">
-                <a href="https://instagram.com/libanoayd" target="_blank" rel="noopener noreferrer" className="flex items-center text-stone-500 hover:text-[var(--color-brand-mint)] transition-colors">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="mr-2"
-                  >
+              <div className="flex space-x-6 mt-6 md:mt-0">
+                <a href="https://instagram.com/libanoayd" target="_blank" rel="noopener noreferrer" className="text-stone-400 hover:text-[var(--color-brand-mint)] transition-transform hover:scale-110">
+                  <span className="sr-only">Instagram</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                     <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
                     <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
                     <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
                   </svg>
-                  <span>Instagram</span>
                 </a>
-                <a href="https://facebook.com/libanoayd" target="_blank" rel="noopener noreferrer" className="flex items-center text-stone-500 hover:text-[var(--color-brand-mint)] transition-colors">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="mr-2"
-                  >
+                <a href="https://facebook.com/libanoayd" target="_blank" rel="noopener noreferrer" className="text-stone-400 hover:text-[var(--color-brand-mint)] transition-transform hover:scale-110">
+                  <span className="sr-only">Facebook</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
                   </svg>
-                  <span>Facebook</span>
                 </a>
-                <a href="mailto:hola@tiendalibano.com" className="flex items-center text-stone-500 hover:text-[var(--color-brand-mint)] transition-colors">
-                  <Mail className="h-5 w-5 mr-2" />
-                  <span>Email</span>
+                <a href="mailto:hola@tiendalibano.com" className="text-stone-400 hover:text-[var(--color-brand-mint)] transition-transform hover:scale-110">
+                  <span className="sr-only">Email</span>
+                  <Mail className="h-[22px] w-[22px]" strokeWidth={1.5} />
                 </a>
               </div>
             </div>
@@ -166,3 +144,4 @@ export default function RootLayout({
     </html>
   );
 }
+
