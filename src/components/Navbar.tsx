@@ -4,14 +4,21 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ShoppingBag, Menu } from "lucide-react";
+import { ShoppingBag, Menu, Heart, Search } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
+import { useWishlistStore } from "@/store/wishlistStore";
+import { useRouter } from "next/navigation";
 
 export function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [isScrolled, setIsScrolled] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const cartCount = useCartStore((state) => state.getCartCount());
   const toggleCart = useCartStore((state) => state.toggleCart);
+  
+  const wishlistItems = useWishlistStore((state) => state.items);
+  const wishlistCount = wishlistItems.length;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -21,13 +28,18 @@ export function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Si estamos dentro del panel de administración (/admin), no mostramos el menú de la tienda
   if (pathname?.startsWith("/admin")) {
     return null;
   }
 
-  // Verificamos si estamos en la portada (Home)
   const isHomePage = pathname === "/";
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/catalogo?q=${encodeURIComponent(searchQuery)}`);
+    }
+  };
 
   return (
     <header 
@@ -54,7 +66,7 @@ export function Navbar() {
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden sm:flex space-x-8">
+          <nav className="hidden md:flex space-x-6 items-center">
             <Link href="/" className={`text-sm font-medium transition-colors uppercase tracking-wider ${!isHomePage || isScrolled ? 'text-[var(--color-brand-dark)] hover:text-[var(--color-brand-green)]' : 'text-white hover:text-stone-200 drop-shadow-md'}`}>
               Inicio
             </Link>
@@ -64,13 +76,37 @@ export function Navbar() {
             <Link href="/catalogo" className={`text-sm font-medium transition-colors uppercase tracking-wider ${!isHomePage || isScrolled ? 'text-[var(--color-brand-dark)] hover:text-[var(--color-brand-green)]' : 'text-white hover:text-stone-200 drop-shadow-md'}`}>
               Productos
             </Link>
-            <Link href="/contacto" className={`text-sm font-medium transition-colors uppercase tracking-wider ${!isHomePage || isScrolled ? 'text-[var(--color-brand-dark)] hover:text-[var(--color-brand-green)]' : 'text-white hover:text-stone-200 drop-shadow-md'}`}>
-              Local
-            </Link>
+            
+            {/* Search Bar */}
+            <form onSubmit={handleSearch} className="relative ml-4">
+              <input 
+                type="text" 
+                placeholder="Buscar aroma..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className={`pl-3 pr-10 py-1.5 rounded-full text-sm border focus:outline-none focus:ring-1 focus:ring-[var(--color-brand-green)] transition-all ${
+                  !isHomePage || isScrolled 
+                    ? 'bg-stone-50 border-stone-200 text-stone-800 placeholder-stone-400' 
+                    : 'bg-white/20 border-white/30 text-white placeholder-white/70 focus:bg-white/90 focus:text-stone-900'
+                }`}
+              />
+              <button type="submit" className={`absolute right-3 top-1.5 ${!isHomePage || isScrolled ? 'text-stone-400' : 'text-white/70'}`}>
+                <Search className="h-4 w-4" />
+              </button>
+            </form>
           </nav>
 
-          {/* Cart */}
-          <div className="flex items-center">
+          {/* Icons (Wishlist & Cart) */}
+          <div className="flex items-center space-x-2">
+            <Link href="/favoritos" className={`p-2 relative transition-colors ${!isHomePage || isScrolled ? 'text-[var(--color-brand-dark)] hover:text-red-500' : 'text-white hover:text-red-400 drop-shadow-md'}`}>
+              <Heart className="h-6 w-6" />
+              {wishlistCount > 0 && (
+                <span className="absolute top-1 right-1 inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-bold leading-none text-white transform translate-x-1/4 -translate-y-1/4 bg-red-500 rounded-full">
+                  {wishlistCount}
+                </span>
+              )}
+            </Link>
+
             <button onClick={toggleCart} className={`p-2 relative transition-colors ${!isHomePage || isScrolled ? 'text-[var(--color-brand-dark)] hover:text-[var(--color-brand-green)]' : 'text-white hover:text-stone-200 drop-shadow-md'}`}>
               <ShoppingBag className="h-6 w-6" />
               {cartCount > 0 && (

@@ -11,6 +11,7 @@ export default function ProductoDetail({ params }: { params: Promise<{ id: strin
   const resolvedParams = use(params);
   const productId = parseInt(resolvedParams.id);
   const [product, setProduct] = useState<Product | null>(null);
+  const [related, setRelated] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const addToCart = useCartStore((state) => state.addToCart);
 
@@ -27,7 +28,30 @@ export default function ProductoDetail({ params }: { params: Promise<{ id: strin
           image: data.image_url || "/productos/yagra.png",
           stock: data.stock !== undefined ? data.stock : 10,
           description: data.description,
+          category_id: data.category_id,
         });
+
+        // 2. Fetch related products
+        if (data.category_id) {
+          const { data: relatedData } = await supabase
+            .from("products")
+            .select("*")
+            .eq("category_id", data.category_id)
+            .eq("is_active", true)
+            .neq("id", productId)
+            .limit(4);
+            
+          if (relatedData) {
+            setRelated(relatedData.map((p: any) => ({
+              id: p.id,
+              name: p.name,
+              price: p.price,
+              image: p.image_url || "/productos/yagra.png",
+              stock: p.stock ?? 10,
+              category_id: p.category_id,
+            })));
+          }
+        }
       } else {
         // Fallback a los datos mockeados si no existe en Supabase aún
         const mockProducts: Record<number, Product> = {
@@ -129,6 +153,32 @@ export default function ProductoDetail({ params }: { params: Promise<{ id: strin
 
           </div>
         </div>
+
+        {/* Productos Relacionados (Cross-selling) */}
+        {related.length > 0 && (
+          <div className="mt-24 border-t border-stone-200 pt-16">
+            <h2 className="text-2xl font-serif text-[var(--color-brand-dark)] mb-8 text-center">
+              Quienes compraron esto también llevaron...
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {related.map((p) => (
+                <div key={p.id} className="bg-white rounded-lg shadow-sm border border-stone-100 p-4 hover:shadow-md transition-shadow group">
+                  <div className="relative aspect-[4/5] mb-4 overflow-hidden rounded-md">
+                    <Image src={p.image} alt={p.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                  </div>
+                  <h3 className="font-medium text-stone-900 truncate">
+                    <Link href={`/producto/${p.id}`}>
+                      <span className="absolute inset-0 z-10" />
+                      {p.name}
+                    </Link>
+                  </h3>
+                  <p className="text-[var(--color-brand-terra)] font-bold mt-1">${p.price.toLocaleString('es-AR')}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
       </div>
     </div>
   );

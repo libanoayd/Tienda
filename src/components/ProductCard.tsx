@@ -2,12 +2,16 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ShoppingBag } from "lucide-react";
+import { ShoppingBag, Heart } from "lucide-react";
 import { useCartStore, Product } from "@/store/cartStore";
+import { useWishlistStore } from "@/store/wishlistStore";
 
 export function ProductCard({ product }: { product: Product }) {
   const addToCart = useCartStore((state) => state.addToCart);
+  const { toggleWishlist, isInWishlist } = useWishlistStore();
+  
   const isOutOfStock = product.stock <= 0;
+  const isFav = isInWishlist(product.id);
 
   return (
     <div className={`group relative flex flex-col ${isOutOfStock ? 'opacity-70' : ''}`}>
@@ -25,6 +29,19 @@ export function ProductCard({ product }: { product: Product }) {
             Agotado
           </div>
         )}
+
+        <button 
+          onClick={(e) => {
+            e.preventDefault(); // Prevent link click
+            toggleWishlist(product);
+          }}
+          className={`absolute top-2 right-2 p-2 rounded-full shadow-sm z-20 transition-colors ${
+            isFav ? 'bg-red-50 text-red-500' : 'bg-white/80 text-stone-400 hover:text-red-500 hover:bg-white'
+          }`}
+          aria-label={isFav ? "Quitar de favoritos" : "Agregar a favoritos"}
+        >
+          <Heart className={`h-5 w-5 ${isFav ? 'fill-current' : ''}`} />
+        </button>
 
         {/* Quick Add Button Overlay */}
         {!isOutOfStock && (
