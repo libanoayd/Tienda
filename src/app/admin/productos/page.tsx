@@ -163,6 +163,18 @@ export default function AdminProductos() {
     fetchData();
   };
 
+  const handleQuickUpdate = async (productId: number, field: string, value: number) => {
+    // Update local state for immediate feedback
+    setProducts(products.map(p => p.id === productId ? { ...p, [field]: value } : p));
+    
+    // Update Supabase
+    const { error } = await supabase.from("products").update({ [field]: value }).eq("id", productId);
+    if (error) {
+      alert(`Error al actualizar ${field}: ` + error.message);
+      fetchData(); // Rollback on error
+    }
+  };
+
   const handleDelete = async (id: number) => {
     if (!confirm("¿Estás segura de eliminar este producto?")) return;
     const { error } = await supabase.from("products").delete().eq("id", id);
@@ -297,14 +309,41 @@ export default function AdminProductos() {
                     </span>
                   </td>
                   <td className="py-3 px-6 font-medium">
-                    <span className={`px-2.5 py-1 text-xs rounded-full font-bold ${
-                      (product.stock || 0) > 0 ? "bg-emerald-100 text-emerald-800" : "bg-red-100 text-red-800"
-                    }`}>
-                      {product.stock || 0} unidades
-                    </span>
+                    <input
+                      type="number"
+                      className="w-20 px-2 py-1 text-sm border border-stone-200 rounded-md focus:ring-2 focus:ring-[var(--color-brand-green)] focus:outline-none transition-all"
+                      defaultValue={product.stock || 0}
+                      onBlur={(e) => {
+                        const val = parseInt(e.target.value);
+                        if (!isNaN(val) && val !== product.stock && product.id) {
+                          handleQuickUpdate(product.id, "stock", val);
+                        }
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.currentTarget.blur();
+                        }
+                      }}
+                    />
                   </td>
-                  <td className="py-3 px-6 font-semibold text-[var(--color-brand-terra)]">
-                    ${product.price.toLocaleString("es-AR")}
+                  <td className="py-3 px-6 font-semibold text-[var(--color-brand-terra)] flex items-center gap-1">
+                    $
+                    <input
+                      type="number"
+                      className="w-24 px-2 py-1 text-sm border border-stone-200 rounded-md focus:ring-2 focus:ring-[var(--color-brand-green)] focus:outline-none transition-all font-semibold"
+                      defaultValue={product.price || 0}
+                      onBlur={(e) => {
+                        const val = parseFloat(e.target.value);
+                        if (!isNaN(val) && val !== product.price && product.id) {
+                          handleQuickUpdate(product.id, "price", val);
+                        }
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.currentTarget.blur();
+                        }
+                      }}
+                    />
                   </td>
                   <td className="py-3 px-6 text-right space-x-2">
                     <button
