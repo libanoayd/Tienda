@@ -1,4 +1,4 @@
-﻿
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -175,8 +175,8 @@ export default function AdminDashboard() {
               Ir al Inventario &rarr;
             </Link>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-h-[300px] overflow-y-auto custom-scrollbar pr-2">
-            {lowStockProducts.map((p) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {lowStockProducts.slice(0, 8).map((p) => (
               <div key={p.id} className="bg-white p-3 rounded-lg border border-red-100 shadow-sm flex justify-between items-center hover:border-red-300 transition-colors">
                 <span className="text-sm font-medium text-stone-900 truncate pr-2" title={p.name}>{p.name}</span>
                 <span className={`text-xs font-bold px-2 py-1 rounded-md shrink-0 ${p.stock === 0 ? "bg-red-100 text-red-700" : "bg-orange-100 text-orange-700"}`}>
@@ -185,6 +185,13 @@ export default function AdminDashboard() {
               </div>
             ))}
           </div>
+          {lowStockProducts.length > 8 && (
+            <div className="mt-4 text-center">
+              <Link href="/admin/productos" className="inline-block px-4 py-2 bg-white text-red-700 text-sm font-medium rounded-lg border border-red-200 hover:bg-red-50 transition-colors shadow-sm">
+                Ver {lowStockProducts.length - 8} productos más en el Inventario
+              </Link>
+            </div>
+          )}
         </div>
       )}
     </div>
