@@ -13,6 +13,7 @@ import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { Analytics } from "@vercel/analytics/react";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://tienda-libano.vercel.app"),
   title: "Líbano | Aromas y Decoración",
   description: "Aromas de primera calidad y objetos de decoración seleccionados para crear ambientes de paz. Envíos a todo el país.",
   openGraph: {
