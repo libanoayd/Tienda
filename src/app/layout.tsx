@@ -14,7 +14,29 @@ import { Analytics } from "@vercel/analytics/react";
 
 export const metadata: Metadata = {
   title: "Líbano | Aromas y Decoración",
-  description: "Velas, difusores, deco y aromas para tu hogar.",
+  description: "Aromas de primera calidad y objetos de decoración seleccionados para crear ambientes de paz. Envíos a todo el país.",
+  openGraph: {
+    title: "Líbano | Aromas y Decoración",
+    description: "Aromas de primera calidad y objetos de decoración seleccionados para crear ambientes de paz. Envíos a todo el país.",
+    url: "https://tienda-libano.vercel.app",
+    siteName: "Líbano Aromas",
+    images: [
+      {
+        url: "/hero-libano.jpg", // Using an existing attractive image
+        width: 1200,
+        height: 630,
+        alt: "Líbano Aromas y Decoración",
+      },
+    ],
+    locale: "es_AR",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Líbano | Aromas y Decoración",
+    description: "Aromas de primera calidad y objetos de decoración seleccionados para crear ambientes de paz.",
+    images: ["/hero-libano.jpg"],
+  },
 };
 
 export default function RootLayout({
@@ -39,7 +61,7 @@ export default function RootLayout({
         {/* Footer */}
         <footer className="bg-white border-t border-stone-200">
           <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
               <div>
                 <div className="relative h-24 w-24 mb-4 opacity-100">
                   <Image src="/logo-oficial.png" alt="Líbano Logo" fill sizes="96px" className="object-contain rounded-md" />
@@ -59,6 +81,20 @@ export default function RootLayout({
                   </li>
                   <li>
                     <Link href="/contacto" className="text-base text-stone-500 hover:text-stone-900">Contacto</Link>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-stone-900 tracking-wider uppercase mb-4">Ayuda</h3>
+                <ul className="space-y-4">
+                  <li>
+                    <Link href="/ayuda" className="text-base text-stone-500 hover:text-stone-900">Preguntas Frecuentes</Link>
+                  </li>
+                  <li>
+                    <Link href="/ayuda#envios" className="text-base text-stone-500 hover:text-stone-900">Políticas de Envío</Link>
+                  </li>
+                  <li>
+                    <Link href="/ayuda#devoluciones" className="text-base text-stone-500 hover:text-stone-900">Cambios y Devoluciones</Link>
                   </li>
                 </ul>
               </div>
@@ -100,9 +136,26 @@ export default function RootLayout({
                   </svg>
                   <span>Instagram</span>
                 </a>
+                <a href="https://facebook.com/libanoayd" target="_blank" rel="noopener noreferrer" className="flex items-center text-stone-400 hover:text-stone-900 transition-colors">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="mr-2"
+                  >
+                    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+                  </svg>
+                  <span>Facebook</span>
+                </a>
                 <a href="mailto:libanoayd@gmail.com" className="flex items-center text-stone-400 hover:text-stone-900 transition-colors">
                   <Mail className="h-5 w-5 mr-2" />
-                  <span>libanoayd@gmail.com</span>
+                  <span>Email</span>
                 </a>
               </div>
             </div>
