@@ -1,3 +1,4 @@
+﻿
 "use client";
 
 import { useEffect, useState } from "react";
@@ -57,25 +58,23 @@ export default function AdminDashboard() {
         <p className="text-stone-500 text-sm mt-1">Métricas en vivo conectadas a tu base de datos Supabase.</p>
       </div>
 
-      {/* Tarjetas de Métricas en Vivo */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+      {/* Tarjetas de Resumen */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div className="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-stone-500 font-medium">Productos Activos</h3>
-            <div className="p-2.5 bg-emerald-50 text-[var(--color-brand-green)] rounded-xl border border-emerald-100">
+          <div className="flex justify-between items-start mb-4">
+            <p className="text-stone-500 text-sm font-medium">Productos Activos</p>
+            <div className="p-2 bg-[var(--color-brand-green)]/10 text-[var(--color-brand-green)] rounded-lg">
               <Package className="h-6 w-6" />
             </div>
           </div>
           <p className="text-4xl font-bold text-stone-900">{loading ? "..." : productsCount}</p>
-          <p className="text-xs text-stone-500 mt-2 flex items-center">
-            En {categoriesCount} secciones / categorías
-          </p>
+          <p className="text-xs text-stone-500 mt-2">En {loading ? "..." : categoriesCount} secciones / categorías</p>
         </div>
 
         <div className="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-stone-500 font-medium">Secciones Creadas</h3>
-            <div className="p-2.5 bg-blue-50 text-blue-700 rounded-xl border border-blue-100">
+          <div className="flex justify-between items-start mb-4">
+            <p className="text-stone-500 text-sm font-medium">Secciones Creadas</p>
+            <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
               <FolderPlus className="h-6 w-6" />
             </div>
           </div>
@@ -84,9 +83,9 @@ export default function AdminDashboard() {
         </div>
 
         <div className="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-stone-500 font-medium">Cupones de Descuento</h3>
-            <div className="p-2.5 bg-orange-50 text-[var(--color-brand-terra)] rounded-xl border border-orange-100">
+          <div className="flex justify-between items-start mb-4">
+            <p className="text-stone-500 text-sm font-medium">Cupones de Descuento</p>
+            <div className="p-2 bg-orange-50 text-[var(--color-brand-terra)] rounded-lg">
               <Tag className="h-6 w-6" />
             </div>
           </div>
@@ -95,30 +94,8 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Alerta de Stock Bajo */}
-      {!loading && lowStockProducts.length > 0 && (
-        <div className="mb-8 bg-red-50 p-6 rounded-xl border border-red-200">
-          <h3 className="text-lg font-serif text-red-900 mb-2 flex items-center">
-            ⚠️ Atención: Productos con stock bajo
-          </h3>
-          <p className="text-red-700 text-sm mb-4">
-            Los siguientes productos tienen 3 o menos unidades disponibles. Recuerda reponer inventario.
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {lowStockProducts.map((p) => (
-              <div key={p.id} className="bg-white p-3 rounded-lg border border-red-100 shadow-sm flex justify-between items-center">
-                <span className="text-sm font-medium text-stone-900 truncate pr-2">{p.name}</span>
-                <span className={`text-xs font-bold px-2 py-1 rounded-md ${p.stock === 0 ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>
-                  {p.stock} unid.
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* Accesos Rápidos y Últimos Productos Reales */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
         
         <div className="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
           <div className="flex justify-between items-center mb-6">
@@ -181,6 +158,36 @@ export default function AdminDashboard() {
         </div>
 
       </div>
+
+      {/* Alerta de Stock Bajo */}
+      {!loading && lowStockProducts.length > 0 && (
+        <div className="bg-red-50 p-6 rounded-xl border border-red-200 mt-8">
+          <div className="flex justify-between items-end mb-4">
+            <div>
+              <h3 className="text-lg font-serif text-red-900 flex items-center">
+                ⚠️ Atención: Productos con stock bajo
+              </h3>
+              <p className="text-red-700 text-sm mt-1">
+                Hay {lowStockProducts.length} productos con 3 o menos unidades disponibles. Recuerda reponer inventario.
+              </p>
+            </div>
+            <Link href="/admin/productos" className="text-sm font-semibold text-red-700 hover:underline">
+              Ir al Inventario &rarr;
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-h-[300px] overflow-y-auto custom-scrollbar pr-2">
+            {lowStockProducts.map((p) => (
+              <div key={p.id} className="bg-white p-3 rounded-lg border border-red-100 shadow-sm flex justify-between items-center hover:border-red-300 transition-colors">
+                <span className="text-sm font-medium text-stone-900 truncate pr-2" title={p.name}>{p.name}</span>
+                <span className={`text-xs font-bold px-2 py-1 rounded-md shrink-0 ${p.stock === 0 ? "bg-red-100 text-red-700" : "bg-orange-100 text-orange-700"}`}>
+                  {p.stock} unid.
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
