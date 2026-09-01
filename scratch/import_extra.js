@@ -240,11 +240,9 @@ async function run() {
     };
   });
   
-  for (const p of products) {
-    if (p.name) {
-      const { error } = await supabase.from('products').insert([p]);
-      if (error) console.log('Error', p.name, error.message);
-    }
+  if (products.length > 0) {
+    const { error } = await supabase.from('products').insert(products);
+    if (error) console.log('Bulk insert error:', error.message);
   }
   console.log('Done importing custom stock!');
 }

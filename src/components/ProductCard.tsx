@@ -45,7 +45,7 @@ export function ProductCard({ product }: { product: Product }) {
 
         {/* Quick Add Button Overlay */}
         {!isOutOfStock && (
-          <div className="absolute inset-0 bg-black/5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <div className="absolute inset-0 bg-black/5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
             <button
               onClick={(e) => {
                 e.preventDefault();

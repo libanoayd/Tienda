@@ -194,7 +194,7 @@ export default function ProductoDetail({ params }: { params: Promise<{ id: strin
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {related.map((p) => (
-                <div key={p.id} className="bg-white rounded-lg shadow-sm border border-stone-100 p-4 hover:shadow-md transition-shadow group">
+                <div key={p.id} className="bg-white rounded-lg shadow-sm border border-stone-100 p-4 hover:shadow-md transition-shadow group relative">
                   <div className="relative aspect-[4/5] mb-4 overflow-hidden rounded-md">
                     <Image src={p.image} alt={p.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
                   </div>
