@@ -1,4 +1,4 @@
-﻿
+
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Truck, CreditCard, ShieldCheck, Sparkles } from "lucide-react";
@@ -141,7 +141,6 @@ export default async function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 flex flex-col md:flex-row items-center gap-12">
           <div className="w-full md:w-1/2">
             <div className="aspect-square relative rounded-full bg-stone-100 overflow-hidden flex items-center justify-center p-12">
-              <Sparkles className="absolute text-[var(--color-brand-mint)]/20 w-full h-full p-20" />
               <Image src="/logo-oficial.png" alt="Líbano Logo" width={300} height={300} className="object-contain relative z-10" />
             </div>
           </div>
